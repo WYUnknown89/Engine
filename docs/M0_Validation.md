@@ -129,8 +129,21 @@ also awaiting a workflow rerun.
 
 ## Remaining open gates
 
-- Push the Catch2 configuration correction and obtain a new successful GitHub
-  Actions run for Ubuntu GCC Debug, Ubuntu Clang Debug, and Windows MSVC Debug.
+- Push commit `d897b0f` (`M0: Align Catch2 with C++20 consumers`) and obtain a
+  new successful GitHub Actions run for Ubuntu GCC Debug, Ubuntu Clang Debug,
+  and Windows MSVC Debug. The attempted command was:
+
+  ```bash
+  git push origin main
+  ```
+
+  It failed because no GitHub HTTPS credential is configured in this
+  environment:
+
+  ```text
+  fatal: could not read Username for 'https://github.com': No such device or address
+  ```
+
 - Record that run’s job URLs and results here.
 
 M0 remains in progress until all three required GitHub Actions jobs pass. The
