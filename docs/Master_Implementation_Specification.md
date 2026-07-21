@@ -1,7 +1,11 @@
 # MASTER IMPLEMENTATION SPECIFICATION
+
 Custom 3D Isometric Action RPG Engine
-Autonomous Coding Agent Edition • Version 1.0
+
+Autonomous Coding Agent Edition • Version 1.1
+
 Purpose: This document is the canonical implementation contract for an AI coding agent tasked with building a bespoke, high-performance 3D isometric Action RPG engine and game framework without using a third-party game engine.
+
 ## 1. Project Mission and Non-Negotiable Constraints
 Build a custom engine specifically optimised for a Diablo-style 3D isometric Action RPG. The target workload includes hundreds of simultaneously active enemies, projectiles, loot objects and visual effects, deterministic fixed-step gameplay, grid-aware navigation, data-driven content and an integrated developer toolchain.
 Non-negotiable constraints:

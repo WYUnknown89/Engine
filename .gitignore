@@ -1,0 +1,42 @@
+# Out-of-source build products
+/build/
+/compile_commands.json
+/CMakeUserPresets.json
+
+# Compilers and linkers
+*.a
+*.d
+*.dll
+*.dylib
+*.exe
+*.exp
+*.ilk
+*.lib
+*.o
+*.obj
+*.pdb
+*.so
+*.spv
+
+# Generated runtime assets; keep the policy document
+/assets-compiled/*
+!/assets-compiled/README.md
+
+# Temporary asset compiler output
+*.asset-tmp
+*.tmp
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+/.idea/
+/.vs/
+/.vscode/
+*.swp
+*~
+
+# Diagnostics, profiles, and caches
+*.log
+/.cache/
+/.clangd/
+/profiles/

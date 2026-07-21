@@ -2,7 +2,7 @@
 
   Milestone                    Status
   ---------------------------- --------
-  M0 Repository Bootstrap      ⬜
+  M0 Repository Bootstrap      🟨 In progress
   M1 Platform & Game Loop      ⬜
   M2 Memory & Diagnostics      ⬜
   M3 ECS                       ⬜

@@ -1,0 +1,57 @@
+include_guard(GLOBAL)
+
+option(ARPG_BUILD_TESTS "Build M0 and later automated tests" ON)
+option(ARPG_BUILD_TOOLS "Build developer-tool targets" ON)
+option(ARPG_VALIDATE_RUNTIME_TOOLS "Require Vulkan and GLSL/SPIR-V host tools" ON)
+option(ARPG_WARNINGS_AS_ERRORS "Treat project warnings as errors" OFF)
+option(ARPG_ENABLE_ASAN "Enable AddressSanitizer for project targets" OFF)
+option(ARPG_ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer for project targets" OFF)
+option(ARPG_BOOTSTRAP_NULL_GLFW "Use GLFW's null backend for dependency-only bootstrap validation" OFF)
+
+function(arpg_create_project_options)
+    if(TARGET arpg_project_options)
+        return()
+    endif()
+
+    add_library(arpg_project_options INTERFACE)
+    add_library(arpg::project_options ALIAS arpg_project_options)
+    target_compile_features(arpg_project_options INTERFACE cxx_std_20)
+
+    if(MSVC)
+        target_compile_options(arpg_project_options INTERFACE /permissive- /Zc:preprocessor /utf-8)
+    endif()
+
+    if(ARPG_ENABLE_ASAN OR ARPG_ENABLE_UBSAN)
+        if(MSVC)
+            message(FATAL_ERROR "The M0 sanitizer presets support GCC and Clang only")
+        endif()
+
+        set(ARPG_SANITIZERS "")
+        if(ARPG_ENABLE_ASAN)
+            list(APPEND ARPG_SANITIZERS address)
+        endif()
+        if(ARPG_ENABLE_UBSAN)
+            list(APPEND ARPG_SANITIZERS undefined)
+        endif()
+        list(JOIN ARPG_SANITIZERS "," ARPG_SANITIZER_LIST)
+
+        target_compile_options(arpg_project_options INTERFACE
+            -fno-omit-frame-pointer "-fsanitize=${ARPG_SANITIZER_LIST}")
+        target_link_options(arpg_project_options INTERFACE "-fsanitize=${ARPG_SANITIZER_LIST}")
+    endif()
+endfunction()
+
+function(arpg_register_format_sources)
+    foreach(ARPG_SOURCE IN LISTS ARGN)
+        if(IS_ABSOLUTE "${ARPG_SOURCE}")
+            set(ARPG_ABSOLUTE_SOURCE "${ARPG_SOURCE}")
+        else()
+            cmake_path(ABSOLUTE_PATH ARPG_SOURCE BASE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                       OUTPUT_VARIABLE ARPG_ABSOLUTE_SOURCE)
+        endif()
+        set_property(GLOBAL APPEND PROPERTY ARPG_FORMAT_SOURCES "${ARPG_ABSOLUTE_SOURCE}")
+        if(ARPG_ABSOLUTE_SOURCE MATCHES "\\.(c|cc|cpp|cxx)$")
+            set_property(GLOBAL APPEND PROPERTY ARPG_TIDY_SOURCES "${ARPG_ABSOLUTE_SOURCE}")
+        endif()
+    endforeach()
+endfunction()

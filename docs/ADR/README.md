@@ -1,14 +1,11 @@
 # Architecture Decision Records
 
-Each architectural decision gets its own file.
+Each architectural decision uses a numbered Markdown file with these sections:
 
-Example:
+- Status
+- Context
+- Decision
+- Consequences
 
-ADR-0002-Catch2.md
-
-Sections:
-
--   Status
--   Context
--   Decision
--   Consequences
+Accepted decisions are indexed in `docs/Architecture_Decisions.md`. A later ADR
+must identify the earlier record it supersedes.

@@ -1,0 +1,16 @@
+Checks: >
+  -*,
+  clang-analyzer-*,
+  bugprone-*,
+  performance-*,
+  portability-*,
+  modernize-avoid-c-arrays,
+  modernize-use-nullptr,
+  modernize-use-override,
+  readability-duplicate-include,
+  readability-implicit-bool-conversion,
+  readability-redundant-control-flow
+WarningsAsErrors: '*'
+HeaderFilterRegex: '^(core-engine|arpg-gameplay|dev-tools|apps|tests)/'
+SystemHeaders: false
+FormatStyle: file

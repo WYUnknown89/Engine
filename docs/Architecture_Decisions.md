@@ -1,23 +1,20 @@
 # Architecture Decisions
 
-  -----------------------------------------------------------------------
-  ADR                     Title                   Status
-  ----------------------- ----------------------- -----------------------
-  ADR-0001                Markdown is canonical   Accepted
-                          specification           
+The canonical decision details are recorded in the accepted
+[pre-implementation audit](Pre_Implementation_Audit.md). Architecture decision
+records in `docs/ADR` explain individual decisions that need longer-lived
+context.
 
-  ADR-0002                C++20 + Vulkan 1.3      Accepted
+| ADR | Title | Status |
+| --- | --- | --- |
+| ADR-0001 | Markdown is the canonical specification | Accepted |
+| ADR-0002 | C++20, CMake, and Vulkan 1.3 technology baseline | Accepted |
+| ADR-0003 | Single-player with future authoritative-server compatibility | Accepted |
+| ADR-0004 | Same-build/platform deterministic replay scope | Accepted |
+| ADR-0005 | Sparse-set ECS foundation | Accepted |
+| ADR-0006 | Catch2 v3 and CTest | Accepted |
+| ADR-0007 | Pinned CMake FetchContent dependencies | Accepted |
+| ADR-0008 | One-way engine, gameplay, application, and tool dependencies | Accepted |
 
-  ADR-0003                Single-player, future   Accepted
-                          authoritative server    
-                          compatibility           
-
-  ADR-0004                Same-build/platform     Accepted
-                          deterministic replay    
-
-  ADR-0005                Sparse-set ECS          Proposed
-
-  ADR-0006                Catch2 v3               Proposed
-  -----------------------------------------------------------------------
-
-See the ADR folder for full records.
+The audit's “Locked Architecture Decisions” section is binding unless a later
+accepted ADR explicitly supersedes a decision.
