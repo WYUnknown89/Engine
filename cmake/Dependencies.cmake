@@ -28,6 +28,10 @@ function(arpg_configure_dependencies)
     set(CATCH_BUILD_TESTING OFF CACHE BOOL "" FORCE)
     set(CATCH_INSTALL_DOCS OFF CACHE BOOL "" FORCE)
     set(CATCH_INSTALL_EXTRAS OFF CACHE BOOL "" FORCE)
+    # Catch2 is a compiled dependency. Force its generated configuration and
+    # compilation mode to match the project's C++20 consumers so the
+    # std::string_view StringMaker declaration and definition cannot diverge.
+    set(CATCH_CONFIG_CPP17_STRING_VIEW ON CACHE BOOL "" FORCE)
     set(VOLK_INSTALL OFF CACHE BOOL "" FORCE)
 
     FetchContent_Declare(
@@ -74,6 +78,20 @@ function(arpg_configure_dependencies)
     )
 
     FetchContent_MakeAvailable(vulkan_headers glfw glm catch2 volk)
+
+    foreach(ARPG_CATCH_TARGET IN ITEMS Catch2 Catch2WithMain)
+        if(NOT TARGET ${ARPG_CATCH_TARGET})
+            message(FATAL_ERROR "Pinned Catch2 did not provide target ${ARPG_CATCH_TARGET}")
+        endif()
+        set_target_properties(
+            ${ARPG_CATCH_TARGET}
+            PROPERTIES
+                CXX_STANDARD 20
+                CXX_STANDARD_REQUIRED ON
+                CXX_EXTENSIONS OFF)
+        target_compile_features(${ARPG_CATCH_TARGET} PUBLIC cxx_std_20)
+    endforeach()
+
     set(ARPG_CATCH2_EXTRAS_DIR "${catch2_SOURCE_DIR}/extras" CACHE INTERNAL
         "Path to the pinned Catch2 CMake integration modules")
     FetchContent_GetProperties(imgui)
