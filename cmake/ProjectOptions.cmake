@@ -18,7 +18,13 @@ function(arpg_create_project_options)
     target_compile_features(arpg_project_options INTERFACE cxx_std_20)
 
     if(MSVC)
-        target_compile_options(arpg_project_options INTERFACE /permissive- /Zc:preprocessor /utf-8)
+        target_compile_options(
+            arpg_project_options
+            INTERFACE
+                /permissive-
+                /Zc:preprocessor
+                /Zc:__cplusplus
+                /utf-8)
     endif()
 
     if(ARPG_ENABLE_ASAN OR ARPG_ENABLE_UBSAN)

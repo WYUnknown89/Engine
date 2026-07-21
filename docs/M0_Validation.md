@@ -105,6 +105,20 @@ The regenerated GCC Debug build confirms all three relevant targets now use
 `#define CATCH_CONFIG_CPP17_STRING_VIEW`. GCC Debug, Clang Debug, and GCC
 Release each rebuilt and passed 4 of 4 CTest cases with this configuration.
 
+## MSVC `__cplusplus` conformance fix
+
+The subsequent Windows MSVC build succeeded, but the M0 build-contract test
+reported `build.cpp_standard` as `199711` rather than at least `202002`.
+`build_info.cpp` correctly reads `__cplusplus`; MSVC reports the legacy value
+unless `/Zc:__cplusplus` is enabled.
+
+`cmake/ProjectOptions.cmake` now adds `/Zc:__cplusplus` to the central
+`arpg::project_options` interface target alongside the existing MSVC conformance
+options. The option therefore propagates to `arpg_core_engine`,
+`arpg_gameplay`, `arpg_tools`, the `arpg_apps` application facade, and the
+project test targets. Fetched third-party targets do not consume this interface
+and receive no project warning or compiler-option policy.
+
 ## GitHub Actions validation
 
 Workflow: [`.github/workflows/m0-validation.yml`](../.github/workflows/m0-validation.yml).
@@ -129,21 +143,9 @@ also awaiting a workflow rerun.
 
 ## Remaining open gates
 
-- Push commit `d897b0f` (`M0: Align Catch2 with C++20 consumers`) and obtain a
-  new successful GitHub Actions run for Ubuntu GCC Debug, Ubuntu Clang Debug,
-  and Windows MSVC Debug. The attempted command was:
-
-  ```bash
-  git push origin main
-  ```
-
-  It failed because no GitHub HTTPS credential is configured in this
-  environment:
-
-  ```text
-  fatal: could not read Username for 'https://github.com': No such device or address
-  ```
-
+- Push the central MSVC `/Zc:__cplusplus` correction and obtain a new
+  successful GitHub Actions run for Ubuntu GCC Debug, Ubuntu Clang Debug, and
+  Windows MSVC Debug.
 - Record that run’s job URLs and results here.
 
 M0 remains in progress until all three required GitHub Actions jobs pass. The
