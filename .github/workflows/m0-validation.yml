@@ -1,0 +1,80 @@
+name: M0 validation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  ubuntu-gcc-debug:
+    name: Ubuntu GCC Debug
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install host prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            build-essential cmake ninja-build pkg-config \
+            libvulkan-dev vulkan-tools vulkan-validationlayers \
+            glslc glslang-tools spirv-tools \
+            libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+      - name: Configure
+        run: cmake --preset linux-gcc-debug --fresh
+      - name: Build
+        run: cmake --build --preset linux-gcc-debug --parallel
+      - name: Test
+        run: ctest --preset linux-gcc-debug --output-on-failure
+
+  ubuntu-clang-debug:
+    name: Ubuntu Clang Debug
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install host prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            cmake ninja-build pkg-config clang clang-format clang-tidy \
+            libvulkan-dev vulkan-tools vulkan-validationlayers \
+            glslc glslang-tools spirv-tools \
+            libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+      - name: Configure
+        run: cmake --preset linux-clang-debug --fresh
+      - name: Build
+        run: cmake --build --preset linux-clang-debug --parallel
+      - name: Test
+        run: ctest --preset linux-clang-debug --output-on-failure
+      - name: Check formatting
+        run: cmake --build --preset linux-clang-debug --target format-check
+      - name: Run static analysis
+        run: cmake --build --preset linux-clang-debug --target tidy
+
+  windows-msvc-debug:
+    name: Windows MSVC Debug
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Vulkan SDK
+        shell: pwsh
+        run: choco install vulkan-sdk --yes --no-progress
+      - name: Expose Vulkan SDK tools
+        shell: pwsh
+        run: |
+          $sdk = Get-ChildItem 'C:\VulkanSDK' -Directory |
+            Sort-Object Name -Descending |
+            Select-Object -First 1
+          if ($null -eq $sdk) {
+            throw 'Vulkan SDK installation did not create C:\VulkanSDK.'
+          }
+          "VULKAN_SDK=$($sdk.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "$($sdk.FullName)\Bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Configure
+        shell: pwsh
+        run: cmake --preset windows-msvc-debug --fresh
+      - name: Build
+        shell: pwsh
+        run: cmake --build --preset windows-msvc-debug --parallel
+      - name: Test
+        shell: pwsh
+        run: ctest --preset windows-msvc-debug --output-on-failure

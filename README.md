@@ -32,12 +32,14 @@ sudo apt-get install --no-install-recommends \
   libvulkan-dev vulkan-tools vulkan-validationlayers \
   glslc glslang-tools spirv-tools \
   libglfw3-dev libglm-dev \
+  libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
   clang clang-format clang-tidy
 ```
 
 The project uses pinned source archives for GLFW and GLM by default; the distro
 packages above also make the host SDK complete and allow independent version
-diagnostics.
+diagnostics. The explicit X11 development packages are required because M0
+builds pinned GLFW from source with its X11 backend enabled.
 
 Verify the host after installation:
 

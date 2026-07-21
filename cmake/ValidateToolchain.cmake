@@ -16,8 +16,13 @@ function(arpg_validate_toolchain)
     endif()
 
     if(ARPG_VALIDATE_RUNTIME_TOOLS)
-        find_package(Vulkan 1.3 QUIET)
-        if(NOT Vulkan_FOUND)
+        # Do not call FindVulkan here: it creates Vulkan::Headers, which would
+        # conflict with the deliberately pinned Vulkan-Headers target supplied
+        # by Dependencies.cmake.  This check validates the host SDK prerequisite
+        # only; project targets continue to use the pinned headers.
+        find_path(ARPG_SYSTEM_VULKAN_INCLUDE_DIR NAMES vulkan/vulkan.h)
+        find_library(ARPG_SYSTEM_VULKAN_LOADER_LIBRARY NAMES vulkan vulkan-1)
+        if(NOT ARPG_SYSTEM_VULKAN_INCLUDE_DIR OR NOT ARPG_SYSTEM_VULKAN_LOADER_LIBRARY)
             message(FATAL_ERROR
                 "Vulkan 1.3 development headers and loader were not found. "
                 "On Zorin/Ubuntu install: libvulkan-dev. On Windows install the Vulkan SDK.")
