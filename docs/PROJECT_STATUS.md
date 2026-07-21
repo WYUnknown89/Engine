@@ -2,13 +2,13 @@
 
 ## Current Milestone
 
-**M0 – Repository and Build Bootstrap**
+**M0 – Repository and Build Bootstrap (complete)**
 
 ## Status
 
-**In progress**
+**Complete**
 
-M1 has not started and is not yet approved.
+M1 has not started and requires explicit approval before implementation.
 
 ## Current Branch
 
@@ -18,10 +18,10 @@ M1 has not started and is not yet approved.
 
 `WYUnknown89/Engine`
 
-## Latest Known Commits
+## Latest Validated Commit
 
-- `d897b0f` – M0: Align Catch2 with C++20 consumers
-- `74ee001` – M0: Record Catch2 CI rerun gate
+- `bb6b9d07d051e514f4495b6980970f65d43c220e` – M0: Enable conforming MSVC
+  `__cplusplus`
 
 ## Validation Status
 
@@ -39,53 +39,33 @@ M1 has not started and is not yet approved.
 
 - Ubuntu GCC Debug: passed
 - Ubuntu Clang Debug: passed
-- Windows MSVC Debug: builds successfully after the Catch2 C++20 configuration
-  fix, but its build-contract test reports MSVC's legacy `__cplusplus` value
-  (`199711`)
+- Windows MSVC Debug: passed configure, build, and 4/4 CTest cases
+- Final workflow: [M0 validation #29833829404](https://github.com/WYUnknown89/Engine/actions/runs/29833829404)
 
-## Current Blocker
+## M0 Blockers
 
-The final M0 gate remains open until the Windows MSVC Debug GitHub Actions job
-passes on the latest pushed commit.
+None. Local Linux validation, the required Ubuntu/Windows CI jobs, and the
+independent technical review have all passed.
 
 ## Last Issue Identified
 
-Windows MSVC's `__cplusplus` reports `199711` unless `/Zc:__cplusplus` is
-enabled. This caused the M0 build-contract test to fail after the Catch2 link
-issue was corrected.
+M0 closed after resolving the Windows Vulkan SDK lookup, Catch2 C++20/string-
+view mismatch, and MSVC legacy `__cplusplus` reporting. Their fixes are
+recorded in `docs/M0_Validation.md`.
 
-The central project-options fix:
-
-- adds `/Zc:__cplusplus` to `arpg::project_options`
-- propagates to core engine, gameplay, tools, application facade, and tests
-- leaves `build_info.cpp` reading `__cplusplus`
-- does not apply project options to fetched dependencies
-- does not weaken or remove the existing tests
+The final MSVC project-options fix adds `/Zc:__cplusplus` centrally without
+applying project policy to fetched dependencies.
 
 ## Exact Next Action
 
-1. Commit the central MSVC conformance fix locally and push it manually.
-2. Confirm that all three jobs pass:
-   - Ubuntu GCC Debug
-   - Ubuntu Clang Debug
-   - Windows MSVC Debug
-3. If Windows fails, inspect and fix only the first genuine error.
-4. If all jobs pass:
-   - update `docs/M0_Validation.md`
-   - update `docs/ROADMAP.md` to mark M0 complete
-   - update this file
-   - commit and push the final M0 closure
-   - request independent technical review before starting M1
+Prepare the M1 implementation plan. Do not begin M1 implementation without
+explicit approval.
 
 ## Next Milestone
 
 **M1 – Platform Layer and Fixed Game Loop**
 
-M1 must not begin until:
-
-- M0 is marked complete in the repository
-- all required CI jobs pass
-- the independent technical review approves M0
+M1 has not begun. Its implementation requires explicit approval.
 
 ## Agent Handover Instructions
 

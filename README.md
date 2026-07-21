@@ -3,12 +3,11 @@
 A bespoke C++20 and Vulkan 1.3 engine for a 3D isometric action RPG. The engine
 is intentionally genre-specific and is not a general-purpose game engine.
 
-The repository is in **M0: Repository and Build Bootstrap**. No gameplay,
-renderer, editor, or runtime feature is implemented yet.
+**M0: Repository and Build Bootstrap is complete.** No gameplay, renderer,
+editor, or runtime feature is implemented yet; M1 has not begun.
 
-Current validation evidence and remaining M0 gates are recorded in
-[`docs/M0_Validation.md`](docs/M0_Validation.md). M0 is not complete until the
-normal Linux presets and the Windows MSVC preset pass.
+Validation evidence, including the successful Linux and Windows CI matrix, is
+recorded in [`docs/M0_Validation.md`](docs/M0_Validation.md).
 
 The canonical requirements are in
 [`docs/Master_Implementation_Specification.md`](docs/Master_Implementation_Specification.md).

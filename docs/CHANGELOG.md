@@ -1,5 +1,17 @@
 # Changelog
 
+## M0 – Repository Bootstrap Complete
+
+### Completed
+
+-   Reproducible CMake bootstrap, pinned dependency contracts, target
+    boundaries, and CTest integration established.
+-   Linux GCC Debug, Linux Clang Debug, Linux GCC Release, formatting, and
+    static-analysis validation passed.
+-   GitHub Actions Ubuntu GCC Debug, Ubuntu Clang Debug, and Windows MSVC
+    Debug jobs passed; Windows completed configure, build, and 4/4 CTest cases.
+-   Independent technical review approved the M0 implementation.
+
 ## Unreleased
 
 ### Added

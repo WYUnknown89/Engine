@@ -134,19 +134,27 @@ ran on commit `ca65a04fdb897b3eb8568c491ba4c102004f5475` with these exact result
 | [Ubuntu Clang Debug](https://github.com/WYUnknown89/Engine/actions/runs/29832328672/job/88639888789) | passed | configure, build, CTest, `format-check`, and `tidy` all succeeded |
 | [Windows MSVC Debug](https://github.com/WYUnknown89/Engine/actions/runs/29832328672/job/88639888765) | failed | configure succeeded; build failed linking `arpg_bootstrap_tests` with the Catch2 `std::string_view` unresolved external above; test was skipped |
 
-The Actions log download API is restricted for the current repository token, so
-the detailed Windows configure text is unavailable locally. The repository-side
-cause was nevertheless identified and fixed: host Vulkan SDK validation now
-searches `%VULKAN_SDK%\\Include` and `%VULKAN_SDK%\\Lib` explicitly, rather than
-relying on default CMake search paths. The Catch2 configuration correction is
-also awaiting a workflow rerun.
+The earlier failures were corrected in sequence: host Vulkan SDK lookup now
+searches `%VULKAN_SDK%\\Include` and `%VULKAN_SDK%\\Lib`; Catch2 uses a consistent
+C++20/string-view configuration; and project MSVC targets enable
+`/Zc:__cplusplus`.
 
-## Remaining open gates
+### Final successful run
 
-- Push the central MSVC `/Zc:__cplusplus` correction and obtain a new
-  successful GitHub Actions run for Ubuntu GCC Debug, Ubuntu Clang Debug, and
-  Windows MSVC Debug.
-- Record that run’s job URLs and results here.
+[M0 validation #29833829404](https://github.com/WYUnknown89/Engine/actions/runs/29833829404)
+completed successfully on commit `bb6b9d07d051e514f4495b6980970f65d43c220e`:
 
-M0 remains in progress until all three required GitHub Actions jobs pass. The
-local Linux validation and source-quality gates are complete; M1 has not begun.
+| Job | Result | Evidence |
+|---|---|---|
+| [Ubuntu GCC Debug](https://github.com/WYUnknown89/Engine/actions/runs/29833829404/job/88644965559) | passed | configure, build, and CTest succeeded |
+| [Ubuntu Clang Debug](https://github.com/WYUnknown89/Engine/actions/runs/29833829404/job/88644965601) | passed | configure, build, CTest, `format-check`, and `tidy` succeeded |
+| [Windows MSVC Debug](https://github.com/WYUnknown89/Engine/actions/runs/29833829404/job/88644965593) | passed | configure, build, and all 4 of 4 CTest cases succeeded |
+
+## M0 closure
+
+All documented local Linux validations, source-quality checks, and required
+GitHub Actions jobs have passed. The independent technical review approved the
+M0 implementation. There are no remaining M0 gates or blockers.
+
+M0 is complete. M1 has not begun and requires explicit approval before any M1
+implementation work starts.
