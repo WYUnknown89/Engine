@@ -20,8 +20,14 @@ function(arpg_validate_toolchain)
         # conflict with the deliberately pinned Vulkan-Headers target supplied
         # by Dependencies.cmake.  This check validates the host SDK prerequisite
         # only; project targets continue to use the pinned headers.
-        find_path(ARPG_SYSTEM_VULKAN_INCLUDE_DIR NAMES vulkan/vulkan.h)
-        find_library(ARPG_SYSTEM_VULKAN_LOADER_LIBRARY NAMES vulkan vulkan-1)
+        find_path(
+            ARPG_SYSTEM_VULKAN_INCLUDE_DIR
+            NAMES vulkan/vulkan.h
+            HINTS "$ENV{VULKAN_SDK}/Include")
+        find_library(
+            ARPG_SYSTEM_VULKAN_LOADER_LIBRARY
+            NAMES vulkan vulkan-1
+            HINTS "$ENV{VULKAN_SDK}/Lib" "$ENV{VULKAN_SDK}/Lib32")
         if(NOT ARPG_SYSTEM_VULKAN_INCLUDE_DIR OR NOT ARPG_SYSTEM_VULKAN_LOADER_LIBRARY)
             message(FATAL_ERROR
                 "Vulkan 1.3 development headers and loader were not found. "
