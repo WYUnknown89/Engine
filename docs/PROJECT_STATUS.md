@@ -20,9 +20,9 @@ M2 implementation is authorized. Do not begin M3.
 
 ## Latest Validated Commit
 
-- `22b34d5dea1cadca758fa887cc866296b0cc065d` – M2: Implement memory
-  diagnostics foundation; local validation has passed, while M2 CI, Windows,
-  and independent-review closure gates remain open.
+- `b945d7e64bea8c19ce39c6d4309c0a7e61489fe3` – M2: Correct clang-tidy
+  contracts; the complete local validation matrix has passed, while M2 CI,
+  Windows, and independent-review closure gates remain open.
 
 ## Validation Status
 
@@ -92,7 +92,7 @@ applying project policy to fetched dependencies.
 
 ## Exact Next Action
 
-Commit the targeted M2 clang-tidy correction on `m2-memory-diagnostics`, then
+Push the committed M2 clang-tidy correction from `m2-memory-diagnostics`, then
 await the corrected GitHub Actions run and independent review. Do not begin M3.
 
 ## Next Milestone
