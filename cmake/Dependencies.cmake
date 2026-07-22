@@ -77,7 +77,15 @@ function(arpg_configure_dependencies)
         SYSTEM
     )
 
-    FetchContent_MakeAvailable(vulkan_headers glfw glm catch2 volk)
+    FetchContent_MakeAvailable(catch2)
+
+    if(ARPG_BUILD_DESKTOP_CLIENT OR ARPG_BUILD_DEPENDENCY_SMOKE)
+        FetchContent_MakeAvailable(glfw)
+    endif()
+
+    if(ARPG_BUILD_DEPENDENCY_SMOKE)
+        FetchContent_MakeAvailable(vulkan_headers glm volk)
+    endif()
 
     foreach(ARPG_CATCH_TARGET IN ITEMS Catch2 Catch2WithMain)
         if(NOT TARGET ${ARPG_CATCH_TARGET})
@@ -94,19 +102,21 @@ function(arpg_configure_dependencies)
 
     set(ARPG_CATCH2_EXTRAS_DIR "${catch2_SOURCE_DIR}/extras" CACHE INTERNAL
         "Path to the pinned Catch2 CMake integration modules")
-    FetchContent_GetProperties(imgui)
-    if(NOT imgui_POPULATED)
-        FetchContent_Populate(imgui)
-    endif()
+    if(ARPG_BUILD_DEPENDENCY_SMOKE)
+        FetchContent_GetProperties(imgui)
+        if(NOT imgui_POPULATED)
+            FetchContent_Populate(imgui)
+        endif()
 
-    add_library(
-        arpg_imgui STATIC
-        "${imgui_SOURCE_DIR}/imgui.cpp"
-        "${imgui_SOURCE_DIR}/imgui_draw.cpp"
-        "${imgui_SOURCE_DIR}/imgui_tables.cpp"
-        "${imgui_SOURCE_DIR}/imgui_widgets.cpp"
-    )
-    add_library(imgui::imgui ALIAS arpg_imgui)
-    target_include_directories(arpg_imgui SYSTEM PUBLIC "${imgui_SOURCE_DIR}")
-    set_target_properties(arpg_imgui PROPERTIES POSITION_INDEPENDENT_CODE ON)
+        add_library(
+            arpg_imgui STATIC
+            "${imgui_SOURCE_DIR}/imgui.cpp"
+            "${imgui_SOURCE_DIR}/imgui_draw.cpp"
+            "${imgui_SOURCE_DIR}/imgui_tables.cpp"
+            "${imgui_SOURCE_DIR}/imgui_widgets.cpp"
+        )
+        add_library(imgui::imgui ALIAS arpg_imgui)
+        target_include_directories(arpg_imgui SYSTEM PUBLIC "${imgui_SOURCE_DIR}")
+        set_target_properties(arpg_imgui PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    endif()
 endfunction()

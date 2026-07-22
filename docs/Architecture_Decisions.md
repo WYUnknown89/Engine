@@ -15,6 +15,7 @@ context.
 | ADR-0006 | Catch2 v3 and CTest | Accepted |
 | ADR-0007 | Pinned CMake FetchContent dependencies | Accepted |
 | ADR-0008 | One-way engine, gameplay, application, and tool dependencies | Accepted |
+| ADR-0009 | Platform loop, input, and lifetime contracts | Accepted |
 
 The audit's “Locked Architecture Decisions” section is binding unless a later
 accepted ADR explicitly supersedes a decision.

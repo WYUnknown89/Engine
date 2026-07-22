@@ -14,8 +14,8 @@ function(arpg_assert_target_does_not_link TARGET_NAME)
 endfunction()
 
 function(arpg_validate_target_graph)
-    arpg_assert_target_does_not_link(arpg_core_engine arpg_gameplay arpg_tools arpg_apps)
-    arpg_assert_target_does_not_link(arpg_gameplay arpg_tools arpg_apps)
+    arpg_assert_target_does_not_link(arpg_core_engine arpg_gameplay arpg_tools arpg_apps arpg_platform_glfw)
+    arpg_assert_target_does_not_link(arpg_gameplay arpg_tools arpg_apps arpg_platform_glfw glfw)
 
     if(TARGET arpg_tools)
         arpg_assert_target_does_not_link(arpg_tools arpg_gameplay arpg_apps)

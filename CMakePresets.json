@@ -37,6 +37,20 @@
       }
     },
     {
+      "name": "linux-gcc-headless-debug",
+      "displayName": "Linux GCC Headless Debug",
+      "inherits": "linux-base",
+      "cacheVariables": {
+        "ARPG_BUILD_DEPENDENCY_SMOKE": "OFF",
+        "ARPG_BUILD_DESKTOP_CLIENT": "OFF",
+        "ARPG_BUILD_TOOLS": "OFF",
+        "ARPG_VALIDATE_RUNTIME_TOOLS": "OFF",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
       "name": "linux-gcc-release",
       "displayName": "Linux GCC Release",
       "inherits": "linux-base",
@@ -87,6 +101,10 @@
       "configurePreset": "linux-gcc-release"
     },
     {
+      "name": "linux-gcc-headless-debug",
+      "configurePreset": "linux-gcc-headless-debug"
+    },
+    {
       "name": "linux-clang-debug",
       "configurePreset": "linux-clang-debug"
     },
@@ -106,6 +124,12 @@
     {
       "name": "linux-gcc-release",
       "configurePreset": "linux-gcc-release",
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error" }
+    },
+    {
+      "name": "linux-gcc-headless-debug",
+      "configurePreset": "linux-gcc-headless-debug",
       "output": { "outputOnFailure": true },
       "execution": { "noTestsAction": "error" }
     },

@@ -2,6 +2,8 @@ include_guard(GLOBAL)
 
 option(ARPG_BUILD_TESTS "Build M0 and later automated tests" ON)
 option(ARPG_BUILD_TOOLS "Build developer-tool targets" ON)
+option(ARPG_BUILD_DESKTOP_CLIENT "Build the GLFW desktop client" ON)
+option(ARPG_BUILD_DEPENDENCY_SMOKE "Build the M0 dependency smoke test" ON)
 option(ARPG_VALIDATE_RUNTIME_TOOLS "Require Vulkan and GLSL/SPIR-V host tools" ON)
 option(ARPG_WARNINGS_AS_ERRORS "Treat project warnings as errors" OFF)
 option(ARPG_ENABLE_ASAN "Enable AddressSanitizer for project targets" OFF)

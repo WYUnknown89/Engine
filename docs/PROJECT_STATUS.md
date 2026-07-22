@@ -2,13 +2,13 @@
 
 ## Current Milestone
 
-**M0 – Repository and Build Bootstrap (complete)**
+**M1 – Platform Layer and Fixed Game Loop**
 
 ## Status
 
-**Complete**
+**In progress**
 
-M1 has not started and requires explicit approval before implementation.
+M1 implementation is approved and active. Do not begin M2.
 
 ## Current Branch
 
@@ -58,14 +58,15 @@ applying project policy to fetched dependencies.
 
 ## Exact Next Action
 
-Prepare the M1 implementation plan. Do not begin M1 implementation without
-explicit approval.
+Implement M1 platform boundaries, GLFW lifecycle, bounded input capture, and
+the fixed 60 Hz loop. Keep `docs/M1_Validation.md` and this status current.
 
 ## Next Milestone
 
-**M1 – Platform Layer and Fixed Game Loop**
+**M2 – Memory, Logging and Diagnostics Foundation**
 
-M1 has not begun. Its implementation requires explicit approval.
+M2 must not begin until every M1 validation, smoke, CI, documentation, and
+independent-review gate has passed.
 
 ## Agent Handover Instructions
 
