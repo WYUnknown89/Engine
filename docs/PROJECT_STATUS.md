@@ -20,7 +20,7 @@ M2 implementation is authorized. Do not begin M3.
 
 ## Latest Validated Commit
 
-- `9d06e5e3335d661c1e3c01b0d70c8e3924b0b519` – M2: Implement memory
+- `22b34d5dea1cadca758fa887cc866296b0cc065d` – M2: Implement memory
   diagnostics foundation; local validation has passed, while M2 CI, Windows,
   and independent-review closure gates remain open.
 
