@@ -1,4 +1,4 @@
-name: M0 validation
+name: Engine validation
 
 on:
   push:
@@ -26,6 +26,26 @@ jobs:
       - name: Test
         run: ctest --preset linux-gcc-debug --output-on-failure
 
+  linux-glfw-client-smoke:
+    name: Linux GLFW Client Smoke
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install host prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            build-essential cmake ninja-build pkg-config xvfb \
+            libvulkan-dev vulkan-tools vulkan-validationlayers \
+            glslc glslang-tools spirv-tools \
+            libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+      - name: Configure
+        run: cmake --preset linux-gcc-debug --fresh
+      - name: Build
+        run: cmake --build --preset linux-gcc-debug --parallel
+      - name: GLFW desktop smoke
+        run: xvfb-run -a ./build/linux-gcc-debug/apps/arpg-client/arpg_client --smoke-ticks=5
+
   ubuntu-clang-debug:
     name: Ubuntu Clang Debug
     runs-on: ubuntu-24.04
@@ -49,6 +69,40 @@ jobs:
         run: cmake --build --preset linux-clang-debug --target format-check
       - name: Run static analysis
         run: cmake --build --preset linux-clang-debug --target tidy
+
+  ubuntu-gcc-release:
+    name: Ubuntu GCC Release
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install host prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            build-essential cmake ninja-build pkg-config \
+            libvulkan-dev vulkan-tools vulkan-validationlayers \
+            glslc glslang-tools spirv-tools \
+            libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+      - name: Configure
+        run: cmake --preset linux-gcc-release --fresh
+      - name: Build
+        run: cmake --build --preset linux-gcc-release --parallel
+      - name: Test
+        run: ctest --preset linux-gcc-release --output-on-failure
+
+  ubuntu-gcc-headless-debug:
+    name: Ubuntu GCC Headless Debug
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install host prerequisites
+        run: sudo apt-get update && sudo apt-get install --yes --no-install-recommends build-essential cmake ninja-build
+      - name: Configure
+        run: cmake --preset linux-gcc-headless-debug --fresh
+      - name: Build
+        run: cmake --build --preset linux-gcc-headless-debug --parallel
+      - name: Test
+        run: ctest --preset linux-gcc-headless-debug --output-on-failure
 
   windows-msvc-debug:
     name: Windows MSVC Debug
@@ -78,3 +132,6 @@ jobs:
       - name: Test
         shell: pwsh
         run: ctest --preset windows-msvc-debug --output-on-failure
+      - name: GLFW desktop smoke
+        shell: pwsh
+        run: '& .\build\windows-msvc-debug\apps\arpg-client\Debug\arpg_client.exe --smoke-ticks=5'

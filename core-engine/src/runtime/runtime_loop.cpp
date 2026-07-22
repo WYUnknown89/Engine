@@ -104,13 +104,18 @@ auto RuntimeLoop::run() noexcept -> RunResult {
             }
         }
 
-        if (client_.render({.frame_index = frame_index, .interpolation_alpha = schedule.interpolation_alpha}) ==
-            CallbackControl::failure) {
+        const auto render_control =
+            client_.render({.frame_index = frame_index, .interpolation_alpha = schedule.interpolation_alpha});
+        if (render_control == CallbackControl::failure) {
             result.reason = RunExitReason::client_failure;
             break;
         }
         ++result.rendered_frames;
         ++frame_index;
+        if (render_control == CallbackControl::request_stop) {
+            result.reason = RunExitReason::requested_stop;
+            break;
+        }
     }
 
 finish:

@@ -27,17 +27,20 @@ M1 implementation is approved and active. Do not begin M2.
 
 ### M1 local validation
 
-- GCC Debug: passed, 14/14 tests
-- Clang Debug: passed, 14/14 tests
-- GCC Release: passed, 14/14 tests
-- GCC Headless Debug: passed, 12/12 tests
-- `format-check`: passed after applying the repository clang-format profile
-- `tidy`: passed
-- GLFW smoke on the active local display: passed for 5 Debug ticks and 600
-  Release ticks; the Release run took approximately 10.1 seconds with zero
-  discarded ticks
-- Linux Xvfb smoke, Windows CI/smoke, GitHub Actions rerun, manual lifecycle
-  checks, and independent review: pending
+- GCC Debug: passed, 25/25 tests (14 unit, 11 integration)
+- Clang Debug: passed, 25/25 tests (14 unit, 11 integration)
+- GCC Release: passed, 25/25 tests (14 unit, 11 integration)
+- GCC Headless Debug: passed, 21/21 tests (11 unit, 10 integration)
+- `format-check`: passed after applying the repository clang-format profile to
+  every project-owned file in the target, including new files
+- `tidy`: passed for 14 project source files
+- Linux GLFW/Xvfb smoke: passed for 5 Debug ticks
+- Active-display Release 600-tick timing: passed in 10.01 seconds with zero
+  discarded backlog (within the 9.8–10.2 second tolerance); the Xvfb timing
+  run is retained only as smoke evidence
+- Xvfb repeated-resize and synthetic quick Escape press/release checks: passed
+- Windows CI/smoke, GitHub Actions rerun, window-manager minimize/restore and
+  minimized-CPU lifecycle check, and independent review: pending
 
 ### Local Linux
 
@@ -63,11 +66,11 @@ independent technical review have all passed.
 
 ## M1 Blockers
 
-- `xvfb-run` is not installed locally; installing it requires elevation that is
-  not available non-interactively.
 - Windows MSVC CI build/test/smoke and the GitHub Actions rerun require the
   user's manual push.
-- Required manual minimize/restore, input, and minimized-CPU checks remain.
+- Required window-manager-backed minimize/restore and minimized-CPU checks
+  remain. Raw Xvfb has no window manager and cannot validate this lifecycle
+  path; see `docs/M1_Validation.md`.
 - Independent technical review remains.
 
 ## Last Issue Identified
@@ -81,9 +84,9 @@ applying project policy to fetched dependencies.
 
 ## Exact Next Action
 
-Push the formatting/status correction manually, then obtain the Linux Xvfb and
-Windows CI evidence. Complete the remaining manual lifecycle checks and
-independent review before closing M1.
+Commit and push the targeted independent-review corrections manually, then
+obtain the GitHub Actions and Windows evidence. Complete the remaining
+window-manager lifecycle check and independent review before closing M1.
 
 ## Next Milestone
 

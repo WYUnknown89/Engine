@@ -25,9 +25,11 @@ arpg_enable_project_warnings(arpg_core_engine)
 arpg_register_format_sources(${ARPG_CORE_ENGINE_SOURCES} ${ARPG_CORE_ENGINE_HEADERS})
 
 set(ARPG_PLATFORM_GLFW_SOURCES
+    src/platform/glfw_error_latch.cpp
     src/platform/glfw_platform.cpp
 )
 set(ARPG_PLATFORM_GLFW_HEADERS
+    include/arpg/platform/detail/glfw_error_latch.hpp
     include/arpg/platform/desktop_platform.hpp
 )
 

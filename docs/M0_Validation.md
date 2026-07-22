@@ -121,7 +121,10 @@ and receive no project warning or compiler-option policy.
 
 ## GitHub Actions validation
 
-Workflow: [`.github/workflows/m0-validation.yml`](../.github/workflows/m0-validation.yml).
+The historical M0 runs used `.github/workflows/m0-validation.yml`. That file
+was replaced during M1 by the milestone-neutral
+[`.github/workflows/ci.yml`](../.github/workflows/ci.yml); this does not alter
+the historical M0 results recorded below.
 
 The initial run, [M0 validation #29826526762](https://github.com/WYUnknown89/Engine/actions/runs/29826526762),
 failed Windows configuration on commit `c81aae8ac442cc436297f99d4061e3a8d5379219`.

@@ -3,10 +3,12 @@
 #include "arpg/runtime/fixed_step.hpp"
 #include "arpg/runtime/runtime_loop.hpp"
 
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <limits>
 #include <new>
 
 namespace {
@@ -129,6 +131,33 @@ TEST_CASE("M1 accumulator bounds catch-up and preserves interpolation remainder"
     CHECK(clamped.interpolation_alpha < 1.0);
 }
 
+TEST_CASE("M1 scheduler handles zero, sub-tick, exact multiple, and custom catch-up scheduling", "[unit][m1][timing]") {
+    arpg::runtime::FixedStepScheduler scheduler{};
+    CHECK(scheduler.schedule(arpg::runtime::MonotonicTime{0.0}).tick_count == 0U);
+    CHECK(scheduler.schedule(arpg::runtime::fixed_tick_duration / 2.0).tick_count == 0U);
+
+    const auto exact_multiple = scheduler.schedule(arpg::runtime::fixed_tick_duration * 2.5);
+    CHECK(exact_multiple.tick_count == 3U);
+    CHECK(exact_multiple.interpolation_alpha == Catch::Approx(0.0).margin(1.0e-12));
+
+    arpg::runtime::FixedStepConfig config{};
+    config.maximum_catch_up_ticks = 2U;
+    arpg::runtime::FixedStepScheduler capped_scheduler{config};
+    const auto capped = capped_scheduler.schedule(arpg::runtime::fixed_tick_duration * 5.5);
+    CHECK(capped.tick_count == 2U);
+    CHECK(capped.discarded_tick_count == 3U);
+    CHECK(capped.interpolation_alpha == Catch::Approx(0.5).margin(1.0e-12));
+}
+
+TEST_CASE("M1 scheduler rejects clock regression and detects tick-index exhaustion", "[unit][m1][timing]") {
+    arpg::runtime::FixedStepScheduler scheduler{};
+    CHECK(scheduler.schedule(arpg::runtime::MonotonicTime{-0.001}).clock_regressed);
+
+    arpg::runtime::FixedStepScheduler exhausted_scheduler{{}, std::numeric_limits<arpg::runtime::TickIndex>::max()};
+    CHECK(exhausted_scheduler.complete_tick() == false);
+    CHECK(exhausted_scheduler.next_tick().tick_index == std::numeric_limits<arpg::runtime::TickIndex>::max());
+}
+
 TEST_CASE("M1 input retains a short press and release until one fixed tick", "[unit][m1][input]") {
     arpg::input::InputBuffer input;
     REQUIRE(input.push_key(arpg::input::Key::a, true));
@@ -144,6 +173,31 @@ TEST_CASE("M1 input retains a short press and release until one fixed tick", "[u
 
     input.discard_transitions();
     CHECK(input.snapshot(43U).transitions.empty());
+}
+
+TEST_CASE("M1 input preserves repeat, mouse, scroll, and focus-loss contracts", "[unit][m1][input]") {
+    arpg::input::InputBuffer input;
+    REQUIRE(input.push_key(arpg::input::Key::space, true));
+    REQUIRE(input.push_key(arpg::input::Key::space, true, true));
+    REQUIRE(input.push_mouse_button(arpg::input::MouseButton::left, true));
+    REQUIRE(input.push_mouse_button(arpg::input::MouseButton::left, false));
+    REQUIRE(input.push_scroll(1.0, -2.0));
+
+    const auto snapshot = input.snapshot(5U);
+    REQUIRE(snapshot.transitions.size() == 4U);
+    CHECK(snapshot.transitions[0].type == arpg::input::InputTransitionType::key_pressed);
+    CHECK(snapshot.transitions[1].type == arpg::input::InputTransitionType::mouse_pressed);
+    CHECK(snapshot.transitions[2].type == arpg::input::InputTransitionType::mouse_released);
+    CHECK(snapshot.transitions[3].type == arpg::input::InputTransitionType::scroll);
+    CHECK(snapshot.transitions[3].horizontal_scroll == 1.0);
+    CHECK(snapshot.transitions[3].vertical_scroll == -2.0);
+    CHECK(snapshot.held_keys[static_cast<std::size_t>(arpg::input::Key::space)]);
+
+    input.discard_transitions();
+    input.clear_held_state();
+    const auto after_focus_loss = input.snapshot(6U);
+    CHECK(after_focus_loss.transitions.empty());
+    CHECK(after_focus_loss.held_keys[static_cast<std::size_t>(arpg::input::Key::space)] == false);
 }
 
 TEST_CASE("M1 fixed-loop infrastructure allocates nothing after initialization", "[unit][m1][allocation]") {

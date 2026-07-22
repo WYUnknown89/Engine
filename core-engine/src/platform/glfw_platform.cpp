@@ -1,10 +1,12 @@
 #include "arpg/platform/desktop_platform.hpp"
+#include "arpg/platform/detail/glfw_error_latch.hpp"
 
 #include <GLFW/glfw3.h>
 #include <array>
 #include <cstdio>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace arpg::platform {
@@ -30,14 +32,31 @@ namespace {
     return input::MouseButton::left;
 }
 
-void glfw_error_callback(const int error_code, const char* const description) noexcept {
-    std::fprintf(stderr, "GLFW error %d: %s\n", error_code, description == nullptr ? "unknown" : description);
-}
+class GlfwPlatform;
+thread_local GlfwPlatform* glfw_error_target = nullptr;
+
+class ScopedGlfwErrorTarget {
+  public:
+    explicit ScopedGlfwErrorTarget(GlfwPlatform& target) noexcept : previous_(glfw_error_target) {
+        glfw_error_target = &target;
+    }
+
+    ~ScopedGlfwErrorTarget() { glfw_error_target = previous_; }
+
+    ScopedGlfwErrorTarget(const ScopedGlfwErrorTarget&) = delete;
+    auto operator=(const ScopedGlfwErrorTarget&) -> ScopedGlfwErrorTarget& = delete;
+
+  private:
+    GlfwPlatform* previous_;
+};
+
+void glfw_error_callback(int error_code, const char* description) noexcept;
 
 class GlfwPlatform final : public IPlatform {
   public:
     GlfwPlatform() = default;
     ~GlfwPlatform() override {
+        ScopedGlfwErrorTarget error_target{*this};
         if (window_ != nullptr) {
             glfwSetWindowUserPointer(window_, nullptr);
             glfwDestroyWindow(window_);
@@ -53,16 +72,17 @@ class GlfwPlatform final : public IPlatform {
     auto operator=(const GlfwPlatform&) -> GlfwPlatform& = delete;
 
     [[nodiscard]] auto initialize() -> std::string {
+        ScopedGlfwErrorTarget error_target{*this};
         glfwSetErrorCallback(glfw_error_callback);
         if (glfwInit() != GLFW_TRUE) {
-            return "glfwInit failed";
+            return error_message_or("glfwInit failed");
         }
         initialized_ = true;
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         window_ = glfwCreateWindow(1280, 720, "ARPG Engine", nullptr, nullptr);
         if (window_ == nullptr) {
-            return "glfwCreateWindow failed";
+            return error_message_or("glfwCreateWindow failed");
         }
 
         glfwSetWindowUserPointer(window_, this);
@@ -78,16 +98,21 @@ class GlfwPlatform final : public IPlatform {
         glfwGetCursorPos(window_, &cursor_x_, &cursor_y_);
         input_.set_cursor_position(cursor_x_, cursor_y_);
         glfwShowWindow(window_);
+        if (error_latch_.failed()) {
+            return error_message_or("GLFW runtime initialization error");
+        }
         return {};
     }
 
     void poll_events() noexcept override {
+        ScopedGlfwErrorTarget error_target{*this};
         glfwPollEvents();
         sample_gamepads();
         update_input_failure();
     }
 
     void wait_events() noexcept override {
+        ScopedGlfwErrorTarget error_target{*this};
         glfwWaitEvents();
         sample_gamepads();
         update_input_failure();
@@ -97,9 +122,9 @@ class GlfwPlatform final : public IPlatform {
 
     [[nodiscard]] auto input() noexcept -> input::InputBuffer& override { return input_; }
 
-    [[nodiscard]] auto failed() const noexcept -> bool override { return failed_; }
+    [[nodiscard]] auto failed() const noexcept -> bool override { return error_latch_.failed(); }
 
-    [[nodiscard]] auto error_message() const noexcept -> std::string_view override { return error_message_; }
+    [[nodiscard]] auto error_message() const noexcept -> std::string_view override { return error_latch_.message(); }
 
   private:
     [[nodiscard]] static auto from(GLFWwindow* const window) noexcept -> GlfwPlatform* {
@@ -202,9 +227,21 @@ class GlfwPlatform final : public IPlatform {
         }
     }
 
-    void set_failure(const char* const message) noexcept {
-        failed_ = true;
-        error_message_ = message;
+    friend void glfw_error_callback(int error_code, const char* description) noexcept;
+
+    void record_glfw_error(const int error_code, const char* const description) noexcept {
+        std::array<char, 256U> message{};
+        const auto written = std::snprintf(message.data(), message.size(), "GLFW error %d: %s", error_code,
+                                           description == nullptr ? "unknown" : description);
+        const auto length = written > 0 ? static_cast<std::size_t>(written) : 0U;
+        error_latch_.record(std::string_view{message.data(), std::min(length, message.size() - 1U)});
+    }
+
+    void set_failure(const char* const message) noexcept { error_latch_.record(message); }
+
+    [[nodiscard]] auto error_message_or(const std::string_view fallback) const -> std::string {
+        const auto message = error_latch_.message();
+        return std::string{message.empty() ? fallback : message};
     }
 
     bool initialized_{false};
@@ -213,9 +250,15 @@ class GlfwPlatform final : public IPlatform {
     input::InputBuffer input_{};
     double cursor_x_{0.0};
     double cursor_y_{0.0};
-    bool failed_{false};
-    std::string_view error_message_{};
+    detail::GlfwErrorLatch error_latch_{};
 };
+
+void glfw_error_callback(const int error_code, const char* const description) noexcept {
+    std::fprintf(stderr, "GLFW error %d: %s\n", error_code, description == nullptr ? "unknown" : description);
+    if (glfw_error_target != nullptr) {
+        glfw_error_target->record_glfw_error(error_code, description);
+    }
+}
 
 } // namespace
 

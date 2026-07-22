@@ -10,14 +10,18 @@ namespace {
 
 class ScriptedClock final : public arpg::runtime::IClock {
   public:
+    explicit ScriptedClock(const arpg::runtime::MonotonicTime increment = arpg::runtime::fixed_tick_duration) noexcept
+        : increment_(increment) {}
+
     auto now() noexcept -> arpg::runtime::MonotonicTime override {
         const auto result = now_;
-        now_ += arpg::runtime::fixed_tick_duration;
+        now_ += increment_;
         return result;
     }
 
   private:
     arpg::runtime::MonotonicTime now_{0.0};
+    arpg::runtime::MonotonicTime increment_;
 };
 
 class FakePlatform final : public arpg::platform::IPlatform {
@@ -27,12 +31,21 @@ class FakePlatform final : public arpg::platform::IPlatform {
         if (minimize_on_first_poll && poll_count == 1U) {
             state_.iconified = true;
         }
+        if (close_after_polls > 0U && poll_count >= close_after_polls) {
+            state_.close_requested = true;
+        }
     }
 
     void wait_events() noexcept override {
         ++wait_count;
-        state_.iconified = false;
-        state_.framebuffer_extent = {.width = 1280, .height = 720};
+        if (close_while_suspended) {
+            state_.close_requested = true;
+        } else if (remaining_suspended_waits > 0U) {
+            --remaining_suspended_waits;
+        } else {
+            state_.iconified = false;
+            state_.framebuffer_extent = {.width = 1280, .height = 720};
+        }
     }
 
     [[nodiscard]] auto state() const noexcept -> arpg::platform::PlatformState override { return state_; }
@@ -49,6 +62,9 @@ class FakePlatform final : public arpg::platform::IPlatform {
     std::uint32_t wait_count{0U};
     bool minimize_on_first_poll{false};
     bool fail_after_poll{false};
+    bool close_while_suspended{false};
+    std::uint32_t close_after_polls{0U};
+    std::uint32_t remaining_suspended_waits{0U};
 };
 
 class FakeClient final : public arpg::runtime::IRuntimeClient {
@@ -66,7 +82,7 @@ class FakeClient final : public arpg::runtime::IRuntimeClient {
 
     auto render(const arpg::runtime::RenderContext&) noexcept -> arpg::runtime::CallbackControl override {
         ++render_calls;
-        return arpg::runtime::CallbackControl::continue_running;
+        return render_control;
     }
 
     void on_overload(const arpg::runtime::OverloadEvent&) noexcept override { ++overload_calls; }
@@ -77,25 +93,28 @@ class FakeClient final : public arpg::runtime::IRuntimeClient {
     std::uint32_t overload_calls{0U};
     std::uint32_t stop_after_ticks{1U};
     bool fail_on_first_tick{false};
+    arpg::runtime::CallbackControl render_control{arpg::runtime::CallbackControl::continue_running};
 };
 
 } // namespace
 
-TEST_CASE("M1 runtime consumes edges once across catch-up ticks", "[integration][m1][runtime]") {
-    ScriptedClock clock;
+TEST_CASE("M1 runtime consumes edges once across a real catch-up frame", "[integration][m1][runtime]") {
+    ScriptedClock clock{arpg::runtime::fixed_tick_duration * 3.0};
     FakePlatform platform;
+    platform.close_after_polls = 2U;
     FakeClient client;
-    client.stop_after_ticks = 3U;
+    client.stop_after_ticks = 100U;
     REQUIRE(platform.input().push_key(arpg::input::Key::a, true));
 
     arpg::runtime::RuntimeLoop loop{clock, platform, client};
     const auto result = loop.run();
 
-    CHECK(result.reason == arpg::runtime::RunExitReason::requested_stop);
+    CHECK(result.reason == arpg::runtime::RunExitReason::normal_close);
     CHECK(client.fixed_calls == 3U);
     CHECK(client.transition_counts[0] == 1U);
     CHECK(client.transition_counts[1] == 0U);
     CHECK(client.transition_counts[2] == 0U);
+    CHECK(client.render_calls == 1U);
 }
 
 TEST_CASE("M1 minimized runtime waits and resets scheduling before restore", "[integration][m1][runtime]") {
@@ -111,6 +130,36 @@ TEST_CASE("M1 minimized runtime waits and resets scheduling before restore", "[i
     CHECK(platform.wait_count == 1U);
     CHECK(client.fixed_calls == 1U);
     CHECK(client.render_calls == 0U);
+}
+
+TEST_CASE("M1 runtime stops cleanly when render requests stop", "[integration][m1][runtime]") {
+    ScriptedClock clock;
+    FakePlatform platform;
+    FakeClient client;
+    client.stop_after_ticks = 100U;
+    client.render_control = arpg::runtime::CallbackControl::request_stop;
+
+    arpg::runtime::RuntimeLoop loop{clock, platform, client};
+    const auto result = loop.run();
+
+    CHECK(result.reason == arpg::runtime::RunExitReason::requested_stop);
+    CHECK(client.fixed_calls == 1U);
+    CHECK(client.render_calls == 1U);
+}
+
+TEST_CASE("M1 runtime reports render failure", "[integration][m1][runtime]") {
+    ScriptedClock clock;
+    FakePlatform platform;
+    FakeClient client;
+    client.stop_after_ticks = 100U;
+    client.render_control = arpg::runtime::CallbackControl::failure;
+
+    arpg::runtime::RuntimeLoop loop{clock, platform, client};
+    const auto result = loop.run();
+
+    CHECK(result.reason == arpg::runtime::RunExitReason::client_failure);
+    CHECK(client.fixed_calls == 1U);
+    CHECK(client.render_calls == 1U);
 }
 
 TEST_CASE("M1 runtime quiesces after a callback failure", "[integration][m1][lifetime]") {
@@ -141,4 +190,66 @@ TEST_CASE("M1 platform failure prevents client callbacks", "[integration][m1][li
     CHECK(result.reason == arpg::runtime::RunExitReason::platform_failure);
     CHECK(client.fixed_calls == 0U);
     CHECK(client.render_calls == 0U);
+}
+
+TEST_CASE("M1 input overflow fails before fixed update", "[integration][m1][runtime]") {
+    ScriptedClock clock;
+    FakePlatform platform;
+    FakeClient client;
+    for (std::size_t index = 0U; index < arpg::input::maximum_input_transitions; ++index) {
+        REQUIRE(platform.input().push_scroll(0.0, 1.0));
+    }
+    REQUIRE(platform.input().push_scroll(0.0, 1.0) == false);
+
+    arpg::runtime::RuntimeLoop loop{clock, platform, client};
+    const auto result = loop.run();
+
+    CHECK(result.reason == arpg::runtime::RunExitReason::input_overflow);
+    CHECK(client.fixed_calls == 0U);
+    CHECK(client.render_calls == 0U);
+}
+
+TEST_CASE("M1 close before update prevents callbacks", "[integration][m1][lifetime]") {
+    ScriptedClock clock;
+    FakePlatform platform;
+    platform.state_.close_requested = true;
+    FakeClient client;
+
+    arpg::runtime::RuntimeLoop loop{clock, platform, client};
+    const auto result = loop.run();
+
+    CHECK(result.reason == arpg::runtime::RunExitReason::normal_close);
+    CHECK(client.fixed_calls == 0U);
+    CHECK(client.render_calls == 0U);
+}
+
+TEST_CASE("M1 close while suspended exits without callbacks", "[integration][m1][lifetime]") {
+    ScriptedClock clock;
+    FakePlatform platform;
+    platform.minimize_on_first_poll = true;
+    platform.close_while_suspended = true;
+    FakeClient client;
+
+    arpg::runtime::RuntimeLoop loop{clock, platform, client};
+    const auto result = loop.run();
+
+    CHECK(result.reason == arpg::runtime::RunExitReason::normal_close);
+    CHECK(platform.wait_count == 1U);
+    CHECK(client.fixed_calls == 0U);
+    CHECK(client.render_calls == 0U);
+}
+
+TEST_CASE("M1 suspended runtime repeats event waits until restoration", "[integration][m1][runtime]") {
+    ScriptedClock clock;
+    FakePlatform platform;
+    platform.minimize_on_first_poll = true;
+    platform.remaining_suspended_waits = 2U;
+    FakeClient client;
+
+    arpg::runtime::RuntimeLoop loop{clock, platform, client};
+    const auto result = loop.run();
+
+    CHECK(result.reason == arpg::runtime::RunExitReason::requested_stop);
+    CHECK(platform.wait_count == 3U);
+    CHECK(client.fixed_calls == 1U);
 }

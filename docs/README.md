@@ -9,6 +9,7 @@
 - [Architecture decisions](Architecture_Decisions.md)
 - [Roadmap](ROADMAP.md)
 - [M0 validation status](M0_Validation.md)
+- [M1 validation status](M1_Validation.md)
 - [Changelog](CHANGELOG.md)
 
 ## ADRs

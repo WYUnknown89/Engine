@@ -59,3 +59,14 @@ target_link_libraries(arpg_m1_integration_tests PRIVATE arpg::project_options ar
 arpg_enable_project_warnings(arpg_m1_integration_tests)
 arpg_register_format_sources(${ARPG_M1_INTEGRATION_SOURCES})
 catch_discover_tests(arpg_m1_integration_tests PROPERTIES LABELS "integration;m1")
+
+if(ARPG_BUILD_DESKTOP_CLIENT)
+    set(ARPG_GLFW_PLATFORM_TEST_SOURCES
+        unit/glfw_error_latch_tests.cpp
+    )
+    add_executable(arpg_glfw_platform_tests ${ARPG_GLFW_PLATFORM_TEST_SOURCES})
+    target_link_libraries(arpg_glfw_platform_tests PRIVATE arpg::project_options arpg::platform_glfw Catch2::Catch2WithMain)
+    arpg_enable_project_warnings(arpg_glfw_platform_tests)
+    arpg_register_format_sources(${ARPG_GLFW_PLATFORM_TEST_SOURCES})
+    catch_discover_tests(arpg_glfw_platform_tests PROPERTIES LABELS "unit;platform;m1")
+endif()

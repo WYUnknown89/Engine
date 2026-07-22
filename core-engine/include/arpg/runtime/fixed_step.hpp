@@ -31,7 +31,7 @@ struct FrameSchedule {
 
 class FixedStepScheduler {
   public:
-    explicit FixedStepScheduler(FixedStepConfig config = {});
+    explicit FixedStepScheduler(FixedStepConfig config = {}, TickIndex initial_tick_index = 0U);
 
     [[nodiscard]] auto schedule(std::chrono::duration<double> elapsed) noexcept -> FrameSchedule;
     [[nodiscard]] auto next_tick() const noexcept -> FixedTickContext;

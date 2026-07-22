@@ -6,7 +6,8 @@
 
 namespace arpg::runtime {
 
-FixedStepScheduler::FixedStepScheduler(const FixedStepConfig config) : config_(config) {
+FixedStepScheduler::FixedStepScheduler(const FixedStepConfig config, const TickIndex initial_tick_index)
+    : config_(config), next_tick_index_(initial_tick_index) {
     if (config_.maximum_catch_up_ticks == 0U) {
         config_.maximum_catch_up_ticks = 1U;
     }
