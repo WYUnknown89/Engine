@@ -1,5 +1,20 @@
 # Changelog
 
+## M2 – Memory, Logging and Diagnostics Foundation Complete
+
+### Completed
+
+-   Added fixed-capacity, aligned `LinearArena` and `FixedBlockPool` allocator
+    foundations with checked arithmetic, controlled failures, and deterministic
+    moved-from ownership behavior.
+-   Added Debug assertions with Release unevaluated compile-time validation,
+    synchronous non-throwing structured logging, and optional
+    non-authoritative runtime timing metrics.
+-   Added allocator allocation-discipline tests, stress coverage, benchmark,
+    and explicit Release allocator CI gates.
+-   All required local, GitHub Actions, Windows MSVC, Xvfb smoke, benchmark,
+    and independent technical-review gates passed.
+
 ## M1 – Platform Layer and Fixed Game Loop Complete
 
 ### Completed

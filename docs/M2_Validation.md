@@ -4,9 +4,8 @@ Date: 2026-07-22
 
 Branch: `m2-memory-diagnostics`
 
-M2 implementation is ready for independent review. It is not complete: GitHub
-Actions, Windows MSVC validation, independent technical review, and any
-resulting corrections remain required closure gates.
+M2 is complete. All required local, CI, Windows, smoke, benchmark, and
+independent-review gates have passed.
 
 ## CI clang-tidy correction
 
@@ -102,9 +101,16 @@ The aggregate log reported `exit=1`, `ticks=5`, and `discarded=0`; `1` is the
 numeric `requested_stop` exit reason for the bounded smoke option. The client
 returned success.
 
-## Remaining closure gates
+## Final CI, Windows, and review evidence
 
-- Push and pass the GitHub Actions matrix, including Windows MSVC Debug build,
-  CTest, and bounded desktop smoke.
-- Complete independent technical review and resolve any findings.
-- Do not begin M3 until M2 is formally closed.
+- The corrected GitHub Actions run passed all approved M2 jobs: Linux GCC
+  Debug, Linux Clang Debug with `format-check` and `tidy`, Linux GCC Release
+  with allocator stress and benchmark, Linux GCC Headless Debug, and Linux
+  GLFW/Xvfb smoke.
+- Windows MSVC Debug configure, build, CTest, and bounded `arpg_client` smoke
+  passed.
+- The Independent Technical Review Board verdict is **PASS** for “M2 – Memory,
+  Logging and Diagnostics Foundation.” No corrective implementation findings
+  remain.
+
+M3 remains **not started**.

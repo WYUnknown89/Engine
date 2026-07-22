@@ -6,9 +6,9 @@
 
 ## Status
 
-**In progress**
+**Complete**
 
-M2 implementation is authorized. Do not begin M3.
+M2 is closed. M3 is not started and must not begin without explicit approval.
 
 ## Current Branch
 
@@ -21,8 +21,8 @@ M2 implementation is authorized. Do not begin M3.
 ## Latest Validated Commit
 
 - `b945d7e64bea8c19ce39c6d4309c0a7e61489fe3` – M2: Correct clang-tidy
-  contracts; the complete local validation matrix has passed, while M2 CI,
-  Windows, and independent-review closure gates remain open.
+  contracts; the complete local, CI, Windows, smoke, benchmark, and
+  independent-review validation matrix has passed.
 
 ## Validation Status
 
@@ -64,6 +64,14 @@ M2 implementation is authorized. Do not begin M3.
 - Windows MSVC Debug: passed configure, build, and 4/4 CTest cases
 - Final workflow: [M0 validation #29833829404](https://github.com/WYUnknown89/Engine/actions/runs/29833829404)
 
+### M2 final validation
+
+- Corrected GitHub Actions matrix: passed, including Linux GCC Debug, Linux
+  Clang Debug with format/tidy, Linux GCC Release with allocator stress and
+  benchmark, Linux GCC Headless Debug, Linux GLFW/Xvfb smoke, and Windows MSVC
+  Debug build/test/client smoke
+- Independent Technical Review Board: passed
+
 ## M0 Blockers
 
 None. Local Linux validation, the required Ubuntu/Windows CI jobs, and the
@@ -76,10 +84,8 @@ gates have passed.
 
 ## M2 Blockers
 
-The first M2 CI run failed only at clang-tidy. The targeted correction and its
-complete local validation have passed; do not mark M2 complete until the
-corrected GitHub Actions run, Windows MSVC build/test/client smoke, independent
-review, and any resulting corrective work pass.
+None. M2 local, CI, Windows, smoke, benchmark, and independent-review gates
+have passed.
 
 ## Last Issue Identified
 
@@ -92,15 +98,13 @@ applying project policy to fetched dependencies.
 
 ## Exact Next Action
 
-Push the committed M2 clang-tidy correction from `m2-memory-diagnostics`, then
-await the corrected GitHub Actions run and independent review. Do not begin M3.
+Retain M2 as the completed baseline. Do not begin M3 without explicit approval.
 
 ## Next Milestone
 
-**M2 – Memory, Logging and Diagnostics Foundation**
+**M3 – ECS**
 
-M2 is in progress and awaits its closure gates. M3 must not begin without
-explicit approval after M2 closes.
+**Not started.** M3 must not begin without explicit approval.
 
 ## Agent Handover Instructions
 
