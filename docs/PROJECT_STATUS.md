@@ -76,9 +76,10 @@ gates have passed.
 
 ## M2 Blockers
 
-M2 implementation is ready for independent review. Do not mark M2 complete
-until GitHub Actions, Windows MSVC build/test/client smoke, independent review,
-and any resulting corrective work pass.
+The first M2 CI run failed only at clang-tidy. The targeted correction and its
+complete local validation have passed; do not mark M2 complete until the
+corrected GitHub Actions run, Windows MSVC build/test/client smoke, independent
+review, and any resulting corrective work pass.
 
 ## Last Issue Identified
 
@@ -91,9 +92,8 @@ applying project policy to fetched dependencies.
 
 ## Exact Next Action
 
-Commit the M2 implementation and validation evidence on
-`m2-memory-diagnostics`, then await GitHub Actions and independent review. Do
-not begin M3.
+Commit the targeted M2 clang-tidy correction on `m2-memory-diagnostics`, then
+await the corrected GitHub Actions run and independent review. Do not begin M3.
 
 ## Next Milestone
 

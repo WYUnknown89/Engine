@@ -1,6 +1,7 @@
 #include "arpg/memory/fixed_block_pool.hpp"
 #include "arpg/memory/linear_arena.hpp"
 
+#include <array>
 #include <catch2/catch_test_macros.hpp>
 #include <cstdint>
 #include <cstdlib>
@@ -43,7 +44,7 @@ void operator delete(void* const memory, const std::size_t) noexcept { std::free
 void operator delete[](void* const memory, const std::size_t) noexcept { std::free(memory); }
 
 TEST_CASE("M2 LinearArena aligns backing-derived allocations and tracks capacity", "[unit][m2][arena]") {
-    arpg::memory::LinearArena arena{1024U, 64U};
+    arpg::memory::LinearArena arena{{.capacity_bytes = 1024U, .maximum_alignment = 64U}};
 
     for (const std::size_t alignment : {1U, 2U, 4U, 8U, 16U, 32U, 64U}) {
         const auto allocation = arena.try_allocate(1U, alignment);
@@ -58,7 +59,7 @@ TEST_CASE("M2 LinearArena aligns backing-derived allocations and tracks capacity
 }
 
 TEST_CASE("M2 LinearArena handles exact fit, failures, reset, and reuse", "[unit][m2][arena]") {
-    arpg::memory::LinearArena arena{16U, 16U};
+    arpg::memory::LinearArena arena{{.capacity_bytes = 16U, .maximum_alignment = 16U}};
     REQUIRE(arena.try_allocate(16U, 1U).succeeded());
     CHECK(arena.try_allocate(1U, 1U).error == arpg::memory::AllocationError::exhausted);
     CHECK(arena.try_allocate(0U).error == arpg::memory::AllocationError::zero_size);
@@ -72,34 +73,38 @@ TEST_CASE("M2 LinearArena handles exact fit, failures, reset, and reuse", "[unit
 }
 
 TEST_CASE("M2 LinearArena rejects overflow-prone requests", "[unit][m2][arena]") {
-    arpg::memory::LinearArena arena{64U, 64U};
+    arpg::memory::LinearArena arena{{.capacity_bytes = 64U, .maximum_alignment = 64U}};
     REQUIRE(arena.try_allocate(1U, 1U).succeeded());
     CHECK(arena.try_allocate(std::numeric_limits<std::size_t>::max(), 64U).error ==
           arpg::memory::AllocationError::size_overflow);
 }
 
 TEST_CASE("M2 LinearArena moved-from state is safe and non-owning", "[unit][m2][arena][lifetime]") {
-    arpg::memory::LinearArena source{128U, 32U};
+    arpg::memory::LinearArena source{{.capacity_bytes = 128U, .maximum_alignment = 32U}};
     REQUIRE(source.try_allocate(8U, 8U).succeeded());
     arpg::memory::LinearArena destination{std::move(source)};
 
     CHECK(destination.has_backing());
-    CHECK(source.has_backing() == false);
-    CHECK(source.try_allocate(1U).error == arpg::memory::AllocationError::allocator_unavailable);
-    source.reset();
+    CHECK(source.has_backing() == false); // NOLINT(bugprone-use-after-move): M2 defines moved-from arena state.
+    CHECK(source.try_allocate(1U).error ==
+          arpg::memory::AllocationError::allocator_unavailable); // NOLINT(bugprone-use-after-move): M2 defines
+                                                                 // moved-from arena state.
+    source.reset(); // NOLINT(bugprone-use-after-move): M2 defines moved-from arena state.
 
-    arpg::memory::LinearArena replacement{64U, 16U};
+    arpg::memory::LinearArena replacement{{.capacity_bytes = 64U, .maximum_alignment = 16U}};
     replacement = std::move(destination);
-    CHECK(destination.has_backing() == false);
-    CHECK(destination.try_allocate(1U).error == arpg::memory::AllocationError::allocator_unavailable);
+    CHECK(destination.has_backing() == false); // NOLINT(bugprone-use-after-move): M2 defines moved-from arena state.
+    CHECK(destination.try_allocate(1U).error ==
+          arpg::memory::AllocationError::allocator_unavailable); // NOLINT(bugprone-use-after-move): M2 defines
+                                                                 // moved-from arena state.
     REQUIRE(replacement.try_allocate(1U, 1U).succeeded());
     move_assign(replacement, replacement);
     CHECK(replacement.has_backing());
 }
 
 TEST_CASE("M2 FixedBlockPool aligns each block and reuses released storage", "[unit][m2][pool]") {
-    arpg::memory::FixedBlockPool pool{3U, 32U, 4U};
-    void* addresses[4]{};
+    arpg::memory::FixedBlockPool pool{{.block_size_bytes = 3U, .block_alignment = 32U, .block_count = 4U}};
+    std::array<void*, 4U> addresses{};
     for (auto& address : addresses) {
         const auto allocation = pool.try_allocate();
         REQUIRE(allocation.succeeded());
@@ -114,7 +119,7 @@ TEST_CASE("M2 FixedBlockPool aligns each block and reuses released storage", "[u
 }
 
 TEST_CASE("M2 FixedBlockPool detects invalid release and reset behavior", "[unit][m2][pool]") {
-    arpg::memory::FixedBlockPool pool{16U, 16U, 2U};
+    arpg::memory::FixedBlockPool pool{{.block_size_bytes = 16U, .block_alignment = 16U, .block_count = 2U}};
     const auto allocation = pool.try_allocate();
     REQUIRE(allocation.succeeded());
     CHECK(pool.release(nullptr) == arpg::memory::PoolReleaseResult::null_pointer);
@@ -129,35 +134,45 @@ TEST_CASE("M2 FixedBlockPool detects invalid release and reset behavior", "[unit
 }
 
 TEST_CASE("M2 FixedBlockPool validates construction arithmetic", "[unit][m2][pool]") {
-    CHECK_THROWS_AS((arpg::memory::FixedBlockPool{0U, 8U, 1U}), std::invalid_argument);
-    CHECK_THROWS_AS((arpg::memory::FixedBlockPool{1U, 3U, 1U}), std::invalid_argument);
-    CHECK_THROWS_AS((arpg::memory::FixedBlockPool{64U, 64U, std::numeric_limits<std::size_t>::max()}),
-                    std::overflow_error);
+    CHECK_THROWS_AS((arpg::memory::FixedBlockPool{{.block_size_bytes = 0U, .block_alignment = 8U, .block_count = 1U}}),
+                    std::invalid_argument);
+    CHECK_THROWS_AS((arpg::memory::FixedBlockPool{{.block_size_bytes = 1U, .block_alignment = 3U, .block_count = 1U}}),
+                    std::invalid_argument);
+    CHECK_THROWS_AS(
+        (arpg::memory::FixedBlockPool{
+            {.block_size_bytes = 64U, .block_alignment = 64U, .block_count = std::numeric_limits<std::size_t>::max()}}),
+        std::overflow_error);
 }
 
 TEST_CASE("M2 FixedBlockPool moved-from state is safe and non-owning", "[unit][m2][pool][lifetime]") {
-    arpg::memory::FixedBlockPool source{8U, 8U, 2U};
+    arpg::memory::FixedBlockPool source{{.block_size_bytes = 8U, .block_alignment = 8U, .block_count = 2U}};
     const auto allocation = source.try_allocate();
     REQUIRE(allocation.succeeded());
     arpg::memory::FixedBlockPool destination{std::move(source)};
 
-    CHECK(source.has_backing() == false);
-    CHECK(source.try_allocate().error == arpg::memory::AllocationError::allocator_unavailable);
-    CHECK(source.release(allocation.address) == arpg::memory::PoolReleaseResult::allocator_unavailable);
-    source.reset();
+    CHECK(source.has_backing() == false); // NOLINT(bugprone-use-after-move): M2 defines moved-from pool state.
+    CHECK(source.try_allocate().error ==
+          arpg::memory::AllocationError::allocator_unavailable); // NOLINT(bugprone-use-after-move): M2 defines
+                                                                 // moved-from pool state.
+    CHECK(source.release(allocation.address) ==
+          arpg::memory::PoolReleaseResult::allocator_unavailable); // NOLINT(bugprone-use-after-move): M2 defines
+                                                                   // moved-from pool state.
+    source.reset(); // NOLINT(bugprone-use-after-move): M2 defines moved-from pool state.
 
-    arpg::memory::FixedBlockPool replacement{4U, 8U, 1U};
+    arpg::memory::FixedBlockPool replacement{{.block_size_bytes = 4U, .block_alignment = 8U, .block_count = 1U}};
     replacement = std::move(destination);
-    CHECK(destination.has_backing() == false);
-    CHECK(destination.release(allocation.address) == arpg::memory::PoolReleaseResult::allocator_unavailable);
+    CHECK(destination.has_backing() == false); // NOLINT(bugprone-use-after-move): M2 defines moved-from pool state.
+    CHECK(destination.release(allocation.address) ==
+          arpg::memory::PoolReleaseResult::allocator_unavailable); // NOLINT(bugprone-use-after-move): M2 defines
+                                                                   // moved-from pool state.
     REQUIRE(replacement.release(allocation.address) == arpg::memory::PoolReleaseResult::released);
     move_assign(replacement, replacement);
     CHECK(replacement.has_backing());
 }
 
 TEST_CASE("M2 allocator steady-state operations do not allocate", "[unit][m2][memory][allocation]") {
-    arpg::memory::LinearArena arena{128U, 32U};
-    arpg::memory::FixedBlockPool pool{16U, 16U, 2U};
+    arpg::memory::LinearArena arena{{.capacity_bytes = 128U, .maximum_alignment = 32U}};
+    arpg::memory::FixedBlockPool pool{{.block_size_bytes = 16U, .block_alignment = 16U, .block_count = 2U}};
 
     tracked_allocations = 0U;
     allocation_tracking = true;

@@ -3,13 +3,19 @@
 #include "arpg/memory/allocation.hpp"
 
 #include <cstddef>
-#include <memory>
+#include <vector>
 
 namespace arpg::memory {
 
+struct FixedBlockPoolConfig {
+    std::size_t block_size_bytes{0U};
+    std::size_t block_alignment{0U};
+    std::size_t block_count{0U};
+};
+
 class FixedBlockPool {
   public:
-    FixedBlockPool(std::size_t block_size, std::size_t block_alignment, std::size_t block_count);
+    explicit FixedBlockPool(FixedBlockPoolConfig config);
     ~FixedBlockPool();
 
     FixedBlockPool(const FixedBlockPool&) = delete;
@@ -39,7 +45,7 @@ class FixedBlockPool {
     void record_failed_allocation() noexcept;
 
     std::byte* backing_{nullptr};
-    std::unique_ptr<Slot[]> slots_{};
+    std::vector<Slot> slots_{};
     std::size_t backing_bytes_{0U};
     std::size_t block_size_{0U};
     std::size_t block_alignment_{0U};

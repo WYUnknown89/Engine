@@ -7,7 +7,7 @@
 
 TEST_CASE("M2 allocator stress preserves bounded fixed storage", "[integration][m2][memory][stress]") {
     constexpr std::size_t allocation_count = 200000U;
-    arpg::memory::FixedBlockPool pool{64U, 64U, 1U};
+    arpg::memory::FixedBlockPool pool{{.block_size_bytes = 64U, .block_alignment = 64U, .block_count = 1U}};
 
     for (std::size_t index = 0U; index < allocation_count; ++index) {
         const auto allocation = pool.try_allocate();
@@ -17,7 +17,7 @@ TEST_CASE("M2 allocator stress preserves bounded fixed storage", "[integration][
     CHECK(pool.statistics().successful_allocations == allocation_count);
     CHECK(pool.statistics().live_blocks == 0U);
 
-    arpg::memory::LinearArena arena{4096U, 64U};
+    arpg::memory::LinearArena arena{{.capacity_bytes = 4096U, .maximum_alignment = 64U}};
     constexpr std::size_t allocations_per_reset = 64U;
     for (std::size_t index = 0U; index < allocation_count; ++index) {
         REQUIRE(arena.try_allocate(64U, 64U).succeeded());

@@ -6,9 +6,14 @@
 
 namespace arpg::memory {
 
+struct LinearArenaConfig {
+    std::size_t capacity_bytes{0U};
+    std::size_t maximum_alignment{alignof(std::max_align_t)};
+};
+
 class LinearArena {
   public:
-    explicit LinearArena(std::size_t capacity_bytes, std::size_t maximum_alignment = alignof(std::max_align_t));
+    explicit LinearArena(LinearArenaConfig config);
     ~LinearArena();
 
     LinearArena(const LinearArena&) = delete;

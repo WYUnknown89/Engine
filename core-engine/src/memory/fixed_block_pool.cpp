@@ -10,9 +10,8 @@
 
 namespace arpg::memory {
 
-FixedBlockPool::FixedBlockPool(const std::size_t block_size, const std::size_t block_alignment,
-                               const std::size_t block_count)
-    : block_size_(block_size), block_alignment_(block_alignment), block_count_(block_count) {
+FixedBlockPool::FixedBlockPool(const FixedBlockPoolConfig config)
+    : block_size_(config.block_size_bytes), block_alignment_(config.block_alignment), block_count_(config.block_count) {
     if (block_size_ == 0U || block_count_ == 0U) {
         throw std::invalid_argument{"FixedBlockPool block size and count must be non-zero"};
     }
@@ -24,13 +23,8 @@ FixedBlockPool::FixedBlockPool(const std::size_t block_size, const std::size_t b
         throw std::overflow_error{"FixedBlockPool size calculation overflowed"};
     }
 
-    slots_ = std::make_unique<Slot[]>(block_count_);
-    try {
-        backing_ = static_cast<std::byte*>(::operator new(backing_bytes_, std::align_val_t{block_alignment_}));
-    } catch (...) {
-        slots_.reset();
-        throw;
-    }
+    slots_.resize(block_count_);
+    backing_ = static_cast<std::byte*>(::operator new(backing_bytes_, std::align_val_t{block_alignment_}));
     statistics_.block_size = block_size_;
     statistics_.block_alignment = block_alignment_;
     statistics_.block_capacity = block_count_;
@@ -125,7 +119,7 @@ void FixedBlockPool::release_backing() noexcept {
         ::operator delete(backing_, std::align_val_t{block_alignment_});
     }
     backing_ = nullptr;
-    slots_.reset();
+    std::vector<Slot>{}.swap(slots_);
     backing_bytes_ = 0U;
     block_size_ = 0U;
     block_alignment_ = 0U;
@@ -138,6 +132,7 @@ void FixedBlockPool::release_backing() noexcept {
 void FixedBlockPool::move_from(FixedBlockPool& other) noexcept {
     backing_ = std::exchange(other.backing_, nullptr);
     slots_ = std::move(other.slots_);
+    std::vector<Slot>{}.swap(other.slots_);
     backing_bytes_ = std::exchange(other.backing_bytes_, 0U);
     block_size_ = std::exchange(other.block_size_, 0U);
     block_alignment_ = std::exchange(other.block_alignment_, 0U);

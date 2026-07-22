@@ -6,9 +6,14 @@
 
 namespace arpg::logging {
 
+struct ConsoleSinkStreams {
+    std::FILE* standard_output{stdout};
+    std::FILE* standard_error{stderr};
+};
+
 class ConsoleSink final : public ILogSink {
   public:
-    ConsoleSink(std::FILE* standard_output = stdout, std::FILE* standard_error = stderr) noexcept;
+    explicit ConsoleSink(ConsoleSinkStreams streams = {}) noexcept;
 
     [[nodiscard]] auto write(const LogRecord& record) noexcept -> SinkWriteResult override;
 

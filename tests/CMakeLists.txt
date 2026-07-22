@@ -98,7 +98,6 @@ try_compile(
 if(ARPG_M2_INVALID_RELEASE_ASSERT_COMPILED)
     message(FATAL_ERROR "Release ARPG_ASSERT expressions must remain compile-time type-checked.")
 endif()
-arpg_register_format_sources(compile/m2_invalid_release_assert.cpp)
 
 add_executable(arpg_m2_assertion_probe support/m2_assertion_probe.cpp)
 target_link_libraries(arpg_m2_assertion_probe PRIVATE arpg::project_options arpg::core_engine)

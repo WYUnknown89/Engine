@@ -8,6 +8,23 @@ M2 implementation is ready for independent review. It is not complete: GitHub
 Actions, Windows MSVC validation, independent technical review, and any
 resulting corrections remain required closure gates.
 
+## CI clang-tidy correction
+
+The first M2 GitHub Actions run failed only at clang-tidy. The correction keeps
+the deliberately ill-formed Release assertion probe as a `try_compile` negative
+test but removes it from normal format/tidy registration. It replaces
+same-typed constructor parameter lists with named `ConsoleSinkStreams`,
+`LinearArenaConfig`, and `FixedBlockPoolConfig` records; replaces the test's
+C-style address array with `std::array`; and uses documented line-local
+`NOLINT(bugprone-use-after-move)` annotations only where tests verify the
+explicit M2 moved-from contract. Fixed-pool metadata is bounded `std::vector`
+storage allocated at construction only and released on teardown/move; no
+post-construction pool metadata allocation was introduced.
+
+The corrected Clang Debug `tidy` target and direct focused tidy invocation both
+passed, as did the complete GCC Debug, GCC Release, GCC Headless, and Xvfb
+validation matrix recorded below.
+
 ## Local validation
 
 | Configuration or gate | Result | Tests / evidence |
@@ -65,7 +82,7 @@ git diff --check
 - The allocator stress test completed 200,000 pool allocate/release operations
   and 200,000 arena allocations with bounded resets. It passed in GCC Release.
 - The observed GCC Release benchmark result was
-  `operations=1000000 pool_ns=4814605 arena_ns=2281821`. This is a baseline
+  `operations=1000000 pool_ns=5098534 arena_ns=2427237`. This is a baseline
   measurement only, not a hardware-independent performance threshold.
 - Logger tests cover filtering, structured records, bounded sink registration,
   partial sink failure, fatal severity without process termination, reentrant

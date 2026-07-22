@@ -4,8 +4,8 @@
 
 namespace arpg::logging {
 
-ConsoleSink::ConsoleSink(std::FILE* const standard_output, std::FILE* const standard_error) noexcept
-    : standard_output_(standard_output), standard_error_(standard_error) {}
+ConsoleSink::ConsoleSink(const ConsoleSinkStreams streams) noexcept
+    : standard_output_(streams.standard_output), standard_error_(streams.standard_error) {}
 
 auto ConsoleSink::write(const LogRecord& record) noexcept -> SinkWriteResult {
     std::FILE* const stream =

@@ -9,8 +9,8 @@
 
 namespace arpg::memory {
 
-LinearArena::LinearArena(const std::size_t capacity_bytes, const std::size_t maximum_alignment)
-    : capacity_bytes_(capacity_bytes), maximum_alignment_(maximum_alignment) {
+LinearArena::LinearArena(const LinearArenaConfig config)
+    : capacity_bytes_(config.capacity_bytes), maximum_alignment_(config.maximum_alignment) {
     if (capacity_bytes_ == 0U) {
         throw std::invalid_argument{"LinearArena capacity must be non-zero"};
     }

@@ -16,6 +16,10 @@ remaining independent of gameplay, GLFW, Vulkan, and dev-tools.
 - `LinearArena` and `FixedBlockPool` are move-only RAII owners with fixed,
   initialization-time backing allocations. They never grow or fall back to the
   heap after construction.
+- Allocator construction uses named configuration records so capacity, alignment,
+  and block-count arguments cannot be accidentally reordered. Fixed-pool slot
+  metadata is bounded and allocated only during construction; reset, allocate,
+  and release never grow it.
 - Arena backing alignment is at least its configured maximum alignment. Pool
   backing alignment is at least its block alignment, and checked stride
   round-up ensures every block address is aligned.

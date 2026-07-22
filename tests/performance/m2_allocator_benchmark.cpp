@@ -21,7 +21,7 @@ template <typename Function> [[nodiscard]] auto measure_nanoseconds(Function&& f
 auto main() -> int {
     constexpr std::size_t operation_count = 1000000U;
     constexpr std::size_t allocations_per_reset = 64U;
-    arpg::memory::FixedBlockPool pool{64U, 64U, 1U};
+    arpg::memory::FixedBlockPool pool{{.block_size_bytes = 64U, .block_alignment = 64U, .block_count = 1U}};
     const auto pool_duration = measure_nanoseconds([&pool]() noexcept {
         for (std::size_t index = 0U; index < operation_count; ++index) {
             const auto allocation = pool.try_allocate();
@@ -32,7 +32,7 @@ auto main() -> int {
         }
     });
 
-    arpg::memory::LinearArena arena{4096U, 64U};
+    arpg::memory::LinearArena arena{{.capacity_bytes = 4096U, .maximum_alignment = 64U}};
     const auto arena_duration = measure_nanoseconds([&arena]() noexcept {
         for (std::size_t index = 0U; index < operation_count; ++index) {
             if (!arena.try_allocate(64U, 64U).succeeded()) {
