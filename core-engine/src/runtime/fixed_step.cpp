@@ -24,8 +24,8 @@ auto FixedStepScheduler::schedule(const std::chrono::duration<double> elapsed) n
     schedule.frame_delta_clamped = accepted_delta != elapsed.count();
     accumulator_seconds_ += accepted_delta;
 
-    const auto available_ticks = static_cast<std::uint64_t>(
-        std::floor(accumulator_seconds_ / fixed_tick_duration.count()));
+    const auto available_ticks =
+        static_cast<std::uint64_t>(std::floor(accumulator_seconds_ / fixed_tick_duration.count()));
     const auto allowed_ticks = static_cast<std::uint64_t>(config_.maximum_catch_up_ticks);
     const auto executed_ticks = std::min(available_ticks, allowed_ticks);
     schedule.tick_count = static_cast<std::uint32_t>(executed_ticks);
@@ -38,9 +38,7 @@ auto FixedStepScheduler::schedule(const std::chrono::duration<double> elapsed) n
     return schedule;
 }
 
-auto FixedStepScheduler::next_tick() const noexcept -> FixedTickContext {
-    return {.tick_index = next_tick_index_};
-}
+auto FixedStepScheduler::next_tick() const noexcept -> FixedTickContext { return {.tick_index = next_tick_index_}; }
 
 auto FixedStepScheduler::complete_tick() noexcept -> bool {
     if (next_tick_index_ == std::numeric_limits<TickIndex>::max()) {
@@ -50,8 +48,6 @@ auto FixedStepScheduler::complete_tick() noexcept -> bool {
     return true;
 }
 
-void FixedStepScheduler::reset_timing() noexcept {
-    accumulator_seconds_ = 0.0;
-}
+void FixedStepScheduler::reset_timing() noexcept { accumulator_seconds_ = 0.0; }
 
 } // namespace arpg::runtime

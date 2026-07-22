@@ -4,7 +4,6 @@
 #include "arpg/runtime/runtime_loop.hpp"
 
 #include <catch2/catch_test_macros.hpp>
-
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -16,7 +15,7 @@ bool allocation_tracking = false;
 std::uint64_t tracked_allocations = 0U;
 
 class TestClock final : public arpg::runtime::IClock {
-public:
+  public:
     explicit TestClock(const double increment = 1.0 / 60.0) noexcept : increment_(increment) {}
 
     auto now() noexcept -> arpg::runtime::MonotonicTime override {
@@ -25,13 +24,13 @@ public:
         return result;
     }
 
-private:
+  private:
     arpg::runtime::MonotonicTime now_{0.0};
     double increment_;
 };
 
 class AllocationPlatform final : public arpg::platform::IPlatform {
-public:
+  public:
     void poll_events() noexcept override {
         ++poll_count_;
         if (poll_count_ > 1000U) {
@@ -41,32 +40,24 @@ public:
 
     void wait_events() noexcept override {}
 
-    [[nodiscard]] auto state() const noexcept -> arpg::platform::PlatformState override {
-        return state_;
-    }
+    [[nodiscard]] auto state() const noexcept -> arpg::platform::PlatformState override { return state_; }
 
-    [[nodiscard]] auto input() noexcept -> arpg::input::InputBuffer& override {
-        return input_;
-    }
+    [[nodiscard]] auto input() noexcept -> arpg::input::InputBuffer& override { return input_; }
 
-    [[nodiscard]] auto failed() const noexcept -> bool override {
-        return false;
-    }
+    [[nodiscard]] auto failed() const noexcept -> bool override { return false; }
 
-    [[nodiscard]] auto error_message() const noexcept -> std::string_view override {
-        return {};
-    }
+    [[nodiscard]] auto error_message() const noexcept -> std::string_view override { return {}; }
 
-private:
+  private:
     arpg::platform::PlatformState state_{.framebuffer_extent = {.width = 1280, .height = 720}};
     arpg::input::InputBuffer input_{};
     std::uint32_t poll_count_{0U};
 };
 
 class AllocationClient final : public arpg::runtime::IRuntimeClient {
-public:
-    auto fixed_update(const arpg::runtime::FixedTickContext&, const arpg::input::InputSnapshot&) noexcept
-        -> arpg::runtime::CallbackControl override {
+  public:
+    auto fixed_update(const arpg::runtime::FixedTickContext&,
+                      const arpg::input::InputSnapshot&) noexcept -> arpg::runtime::CallbackControl override {
         ++fixed_update_count;
         return arpg::runtime::CallbackControl::continue_running;
     }
@@ -94,25 +85,15 @@ void* operator new(const std::size_t size) {
     throw std::bad_alloc{};
 }
 
-void* operator new[](const std::size_t size) {
-    return ::operator new(size);
-}
+void* operator new[](const std::size_t size) { return ::operator new(size); }
 
-void operator delete(void* const memory) noexcept {
-    std::free(memory);
-}
+void operator delete(void* const memory) noexcept { std::free(memory); }
 
-void operator delete[](void* const memory) noexcept {
-    std::free(memory);
-}
+void operator delete[](void* const memory) noexcept { std::free(memory); }
 
-void operator delete(void* const memory, const std::size_t) noexcept {
-    std::free(memory);
-}
+void operator delete(void* const memory, const std::size_t) noexcept { std::free(memory); }
 
-void operator delete[](void* const memory, const std::size_t) noexcept {
-    std::free(memory);
-}
+void operator delete[](void* const memory, const std::size_t) noexcept { std::free(memory); }
 
 TEST_CASE("M1 permanently fixes authoritative simulation at 60 Hz", "[unit][m1][timing]") {
     static_assert(arpg::runtime::authoritative_tick_rate_hz == 60U);

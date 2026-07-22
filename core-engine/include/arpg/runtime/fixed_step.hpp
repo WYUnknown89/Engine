@@ -13,9 +13,7 @@ inline constexpr auto fixed_tick_duration = std::chrono::duration<double>{1.0 / 
 struct FixedTickContext {
     TickIndex tick_index;
 
-    [[nodiscard]] static constexpr auto rate_hz() noexcept -> std::uint32_t {
-        return authoritative_tick_rate_hz;
-    }
+    [[nodiscard]] static constexpr auto rate_hz() noexcept -> std::uint32_t { return authoritative_tick_rate_hz; }
 };
 
 struct FixedStepConfig {
@@ -32,7 +30,7 @@ struct FrameSchedule {
 };
 
 class FixedStepScheduler {
-public:
+  public:
     explicit FixedStepScheduler(FixedStepConfig config = {});
 
     [[nodiscard]] auto schedule(std::chrono::duration<double> elapsed) noexcept -> FrameSchedule;
@@ -40,7 +38,7 @@ public:
     [[nodiscard]] auto complete_tick() noexcept -> bool;
     void reset_timing() noexcept;
 
-private:
+  private:
     FixedStepConfig config_;
     TickIndex next_tick_index_{0U};
     double accumulator_seconds_{0.0};

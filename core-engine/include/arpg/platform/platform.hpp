@@ -24,7 +24,7 @@ struct PlatformState {
 };
 
 class IPlatform {
-public:
+  public:
     virtual ~IPlatform() = default;
 
     virtual void poll_events() noexcept = 0;

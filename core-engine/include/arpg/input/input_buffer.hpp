@@ -91,7 +91,7 @@ struct InputSnapshot {
 };
 
 class InputBuffer {
-public:
+  public:
     [[nodiscard]] auto push_key(Key key, bool pressed, bool repeated = false) noexcept -> bool;
     [[nodiscard]] auto push_mouse_button(MouseButton button, bool pressed) noexcept -> bool;
     [[nodiscard]] auto push_scroll(double horizontal, double vertical) noexcept -> bool;
@@ -103,7 +103,7 @@ public:
     [[nodiscard]] auto snapshot(runtime::TickIndex tick_index) const noexcept -> InputSnapshot;
     [[nodiscard]] auto overflowed() const noexcept -> bool;
 
-private:
+  private:
     [[nodiscard]] auto append(InputTransition transition) noexcept -> bool;
 
     std::array<InputTransition, maximum_input_transitions> transitions_{};

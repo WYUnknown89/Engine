@@ -11,9 +11,7 @@ struct DesktopPlatformCreateResult {
     std::unique_ptr<IPlatform> platform{};
     std::string error{};
 
-    [[nodiscard]] auto succeeded() const noexcept -> bool {
-        return platform != nullptr;
-    }
+    [[nodiscard]] auto succeeded() const noexcept -> bool { return platform != nullptr; }
 };
 
 [[nodiscard]] auto create_desktop_platform() -> DesktopPlatformCreateResult;

@@ -9,13 +9,11 @@ auto SteadyClock::now() noexcept -> MonotonicTime {
     return std::chrono::duration_cast<MonotonicTime>(std::chrono::steady_clock::now().time_since_epoch());
 }
 
-RuntimeLoop::RuntimeLoop(
-    IClock& clock, platform::IPlatform& platform, IRuntimeClient& client, const FixedStepConfig config)
+RuntimeLoop::RuntimeLoop(IClock& clock, platform::IPlatform& platform, IRuntimeClient& client,
+                         const FixedStepConfig config)
     : clock_(clock), platform_(platform), client_(client), scheduler_(config) {}
 
-RuntimeLoop::~RuntimeLoop() {
-    shutdown();
-}
+RuntimeLoop::~RuntimeLoop() { shutdown(); }
 
 auto RuntimeLoop::run() noexcept -> RunResult {
     if (quiescent_) {
@@ -120,8 +118,6 @@ finish:
     return result;
 }
 
-void RuntimeLoop::shutdown() noexcept {
-    quiescent_ = true;
-}
+void RuntimeLoop::shutdown() noexcept { quiescent_ = true; }
 
 } // namespace arpg::runtime

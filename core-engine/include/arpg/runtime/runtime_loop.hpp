@@ -13,14 +13,14 @@ namespace arpg::runtime {
 using MonotonicTime = std::chrono::duration<double>;
 
 class IClock {
-public:
+  public:
     virtual ~IClock() = default;
 
     [[nodiscard]] virtual auto now() noexcept -> MonotonicTime = 0;
 };
 
 class SteadyClock final : public IClock {
-public:
+  public:
     [[nodiscard]] auto now() noexcept -> MonotonicTime override;
 };
 
@@ -41,11 +41,11 @@ struct OverloadEvent {
 };
 
 class IRuntimeClient {
-public:
+  public:
     virtual ~IRuntimeClient() = default;
 
-    virtual auto fixed_update(const FixedTickContext& context, const input::InputSnapshot& input) noexcept
-        -> CallbackControl = 0;
+    virtual auto fixed_update(const FixedTickContext& context,
+                              const input::InputSnapshot& input) noexcept -> CallbackControl = 0;
     virtual auto render(const RenderContext& context) noexcept -> CallbackControl = 0;
     virtual void on_overload(const OverloadEvent& event) noexcept = 0;
 };
@@ -69,7 +69,7 @@ struct RunResult {
 };
 
 class RuntimeLoop {
-public:
+  public:
     RuntimeLoop(IClock& clock, platform::IPlatform& platform, IRuntimeClient& client, FixedStepConfig config = {});
     ~RuntimeLoop();
 
@@ -79,7 +79,7 @@ public:
     [[nodiscard]] auto run() noexcept -> RunResult;
     void shutdown() noexcept;
 
-private:
+  private:
     IClock& clock_;
     platform::IPlatform& platform_;
     IRuntimeClient& client_;

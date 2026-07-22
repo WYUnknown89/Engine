@@ -1,28 +1,27 @@
 #include "arpg/platform/platform.hpp"
 #include "arpg/runtime/runtime_loop.hpp"
 
-#include <catch2/catch_test_macros.hpp>
-
 #include <array>
+#include <catch2/catch_test_macros.hpp>
 #include <cstdint>
 #include <string_view>
 
 namespace {
 
 class ScriptedClock final : public arpg::runtime::IClock {
-public:
+  public:
     auto now() noexcept -> arpg::runtime::MonotonicTime override {
         const auto result = now_;
         now_ += arpg::runtime::fixed_tick_duration;
         return result;
     }
 
-private:
+  private:
     arpg::runtime::MonotonicTime now_{0.0};
 };
 
 class FakePlatform final : public arpg::platform::IPlatform {
-public:
+  public:
     void poll_events() noexcept override {
         ++poll_count;
         if (minimize_on_first_poll && poll_count == 1U) {
@@ -36,21 +35,13 @@ public:
         state_.framebuffer_extent = {.width = 1280, .height = 720};
     }
 
-    [[nodiscard]] auto state() const noexcept -> arpg::platform::PlatformState override {
-        return state_;
-    }
+    [[nodiscard]] auto state() const noexcept -> arpg::platform::PlatformState override { return state_; }
 
-    [[nodiscard]] auto input() noexcept -> arpg::input::InputBuffer& override {
-        return input_;
-    }
+    [[nodiscard]] auto input() noexcept -> arpg::input::InputBuffer& override { return input_; }
 
-    [[nodiscard]] auto failed() const noexcept -> bool override {
-        return fail_after_poll && poll_count >= 1U;
-    }
+    [[nodiscard]] auto failed() const noexcept -> bool override { return fail_after_poll && poll_count >= 1U; }
 
-    [[nodiscard]] auto error_message() const noexcept -> std::string_view override {
-        return {};
-    }
+    [[nodiscard]] auto error_message() const noexcept -> std::string_view override { return {}; }
 
     arpg::platform::PlatformState state_{.framebuffer_extent = {.width = 1280, .height = 720}};
     arpg::input::InputBuffer input_{};
@@ -61,9 +52,9 @@ public:
 };
 
 class FakeClient final : public arpg::runtime::IRuntimeClient {
-public:
-    auto fixed_update(const arpg::runtime::FixedTickContext&, const arpg::input::InputSnapshot& input) noexcept
-        -> arpg::runtime::CallbackControl override {
+  public:
+    auto fixed_update(const arpg::runtime::FixedTickContext&,
+                      const arpg::input::InputSnapshot& input) noexcept -> arpg::runtime::CallbackControl override {
         transition_counts[fixed_calls] = input.transitions.size();
         ++fixed_calls;
         if (fail_on_first_tick) {
@@ -78,9 +69,7 @@ public:
         return arpg::runtime::CallbackControl::continue_running;
     }
 
-    void on_overload(const arpg::runtime::OverloadEvent&) noexcept override {
-        ++overload_calls;
-    }
+    void on_overload(const arpg::runtime::OverloadEvent&) noexcept override { ++overload_calls; }
 
     std::array<std::size_t, 8U> transition_counts{};
     std::uint32_t fixed_calls{0U};

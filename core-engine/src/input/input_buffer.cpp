@@ -1,7 +1,5 @@
 #include "arpg/input/input_buffer.hpp"
 
-#include <utility>
-
 namespace arpg::input {
 
 auto InputBuffer::push_key(const Key key, const bool pressed, const bool repeated) noexcept -> bool {
@@ -39,6 +37,7 @@ auto InputBuffer::push_scroll(const double horizontal, const double vertical) no
     });
 }
 
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters): Cartesian cursor coordinates are always x then y.
 void InputBuffer::set_cursor_position(const double x, const double y) noexcept {
     cursor_x_ = x;
     cursor_y_ = y;
@@ -55,9 +54,7 @@ void InputBuffer::clear_held_state() noexcept {
     held_mouse_buttons_.fill(false);
 }
 
-void InputBuffer::discard_transitions() noexcept {
-    transition_count_ = 0U;
-}
+void InputBuffer::discard_transitions() noexcept { transition_count_ = 0U; }
 
 auto InputBuffer::snapshot(const runtime::TickIndex tick_index) const noexcept -> InputSnapshot {
     return {
@@ -71,9 +68,7 @@ auto InputBuffer::snapshot(const runtime::TickIndex tick_index) const noexcept -
     };
 }
 
-auto InputBuffer::overflowed() const noexcept -> bool {
-    return overflowed_;
-}
+auto InputBuffer::overflowed() const noexcept -> bool { return overflowed_; }
 
 auto InputBuffer::append(InputTransition transition) noexcept -> bool {
     if (transition_count_ == transitions_.size()) {
@@ -82,7 +77,7 @@ auto InputBuffer::append(InputTransition transition) noexcept -> bool {
     }
     transition.sequence = next_sequence_;
     ++next_sequence_;
-    transitions_[transition_count_] = std::move(transition);
+    transitions_[transition_count_] = transition;
     ++transition_count_;
     return true;
 }

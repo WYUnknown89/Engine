@@ -10,12 +10,11 @@
 namespace {
 
 class Client final : public arpg::runtime::IRuntimeClient {
-public:
+  public:
     explicit Client(const std::uint64_t smoke_tick_limit) noexcept : smoke_tick_limit_(smoke_tick_limit) {}
 
-    auto fixed_update(
-        const arpg::runtime::FixedTickContext& context, const arpg::input::InputSnapshot& input) noexcept
-        -> arpg::runtime::CallbackControl override {
+    auto fixed_update(const arpg::runtime::FixedTickContext& context,
+                      const arpg::input::InputSnapshot& input) noexcept -> arpg::runtime::CallbackControl override {
         for (const auto& transition : input.transitions) {
             if (transition.type == arpg::input::InputTransitionType::key_pressed &&
                 transition.key == arpg::input::Key::escape) {
@@ -33,19 +32,17 @@ public:
     }
 
     void on_overload(const arpg::runtime::OverloadEvent& event) noexcept override {
-        std::fprintf(
-            stderr,
-            "Runtime overload: discarded=%llu clamped=%s\n",
-            static_cast<unsigned long long>(event.discarded_tick_count),
-            event.frame_delta_clamped ? "true" : "false");
+        std::fprintf(stderr, "Runtime overload: discarded=%llu clamped=%s\n",
+                     static_cast<unsigned long long>(event.discarded_tick_count),
+                     event.frame_delta_clamped ? "true" : "false");
     }
 
-private:
+  private:
     std::uint64_t smoke_tick_limit_{0U};
 };
 
-[[nodiscard]] auto parse_smoke_tick_limit(const int argument_count, char** const arguments, std::uint64_t& limit)
-    -> bool {
+[[nodiscard]] auto parse_smoke_tick_limit(const int argument_count, char** const arguments,
+                                          std::uint64_t& limit) -> bool {
     if (argument_count == 1) {
         return true;
     }
@@ -85,13 +82,10 @@ auto main(const int argument_count, char** const arguments) -> int {
             arpg::runtime::RuntimeLoop loop{clock, *platform, client};
             result = loop.run();
         }
-        std::fprintf(
-            stderr,
-            "Runtime exit: reason=%u ticks=%llu frames=%llu discarded=%llu\n",
-            static_cast<unsigned int>(result.reason),
-            static_cast<unsigned long long>(result.completed_ticks),
-            static_cast<unsigned long long>(result.rendered_frames),
-            static_cast<unsigned long long>(result.discarded_ticks));
+        std::fprintf(stderr, "Runtime exit: reason=%u ticks=%llu frames=%llu discarded=%llu\n",
+                     static_cast<unsigned int>(result.reason), static_cast<unsigned long long>(result.completed_ticks),
+                     static_cast<unsigned long long>(result.rendered_frames),
+                     static_cast<unsigned long long>(result.discarded_ticks));
         return result.reason == arpg::runtime::RunExitReason::client_failure ||
                        result.reason == arpg::runtime::RunExitReason::platform_failure ||
                        result.reason == arpg::runtime::RunExitReason::input_overflow ||

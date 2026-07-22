@@ -12,7 +12,7 @@ M1 implementation is approved and active. Do not begin M2.
 
 ## Current Branch
 
-`main`
+`m1-platform-loop`
 
 ## Repository
 
@@ -24,6 +24,20 @@ M1 implementation is approved and active. Do not begin M2.
   `__cplusplus`
 
 ## Validation Status
+
+### M1 local validation
+
+- GCC Debug: passed, 14/14 tests
+- Clang Debug: passed, 14/14 tests
+- GCC Release: passed, 14/14 tests
+- GCC Headless Debug: passed, 12/12 tests
+- `format-check`: passed after applying the repository clang-format profile
+- `tidy`: passed
+- GLFW smoke on the active local display: passed for 5 Debug ticks and 600
+  Release ticks; the Release run took approximately 10.1 seconds with zero
+  discarded ticks
+- Linux Xvfb smoke, Windows CI/smoke, GitHub Actions rerun, manual lifecycle
+  checks, and independent review: pending
 
 ### Local Linux
 
@@ -47,6 +61,15 @@ M1 implementation is approved and active. Do not begin M2.
 None. Local Linux validation, the required Ubuntu/Windows CI jobs, and the
 independent technical review have all passed.
 
+## M1 Blockers
+
+- `xvfb-run` is not installed locally; installing it requires elevation that is
+  not available non-interactively.
+- Windows MSVC CI build/test/smoke and the GitHub Actions rerun require the
+  user's manual push.
+- Required manual minimize/restore, input, and minimized-CPU checks remain.
+- Independent technical review remains.
+
 ## Last Issue Identified
 
 M0 closed after resolving the Windows Vulkan SDK lookup, Catch2 C++20/string-
@@ -58,8 +81,9 @@ applying project policy to fetched dependencies.
 
 ## Exact Next Action
 
-Implement M1 platform boundaries, GLFW lifecycle, bounded input capture, and
-the fixed 60 Hz loop. Keep `docs/M1_Validation.md` and this status current.
+Push the formatting/status correction manually, then obtain the Linux Xvfb and
+Windows CI evidence. Complete the remaining manual lifecycle checks and
+independent review before closing M1.
 
 ## Next Milestone
 

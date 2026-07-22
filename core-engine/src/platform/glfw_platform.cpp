@@ -1,7 +1,6 @@
 #include "arpg/platform/desktop_platform.hpp"
 
 #include <GLFW/glfw3.h>
-
 #include <array>
 #include <cstdio>
 #include <memory>
@@ -36,7 +35,7 @@ void glfw_error_callback(const int error_code, const char* const description) no
 }
 
 class GlfwPlatform final : public IPlatform {
-public:
+  public:
     GlfwPlatform() = default;
     ~GlfwPlatform() override {
         if (window_ != nullptr) {
@@ -94,23 +93,15 @@ public:
         update_input_failure();
     }
 
-    [[nodiscard]] auto state() const noexcept -> PlatformState override {
-        return state_;
-    }
+    [[nodiscard]] auto state() const noexcept -> PlatformState override { return state_; }
 
-    [[nodiscard]] auto input() noexcept -> input::InputBuffer& override {
-        return input_;
-    }
+    [[nodiscard]] auto input() noexcept -> input::InputBuffer& override { return input_; }
 
-    [[nodiscard]] auto failed() const noexcept -> bool override {
-        return failed_;
-    }
+    [[nodiscard]] auto failed() const noexcept -> bool override { return failed_; }
 
-    [[nodiscard]] auto error_message() const noexcept -> std::string_view override {
-        return error_message_;
-    }
+    [[nodiscard]] auto error_message() const noexcept -> std::string_view override { return error_message_; }
 
-private:
+  private:
     [[nodiscard]] static auto from(GLFWwindow* const window) noexcept -> GlfwPlatform* {
         return static_cast<GlfwPlatform*>(glfwGetWindowUserPointer(window));
     }
