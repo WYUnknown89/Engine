@@ -1,5 +1,19 @@
 # Changelog
 
+## M1 – Platform Layer and Fixed Game Loop Complete
+
+### Completed
+
+-   Implemented the platform abstraction, GLFW desktop lifecycle, fixed 60 Hz
+    simulation loop, bounded input handling, render interpolation, and
+    headless-compatible runtime boundary.
+-   Added bounded catch-up, overflow, timing, lifecycle, input-transition, and
+    allocation-discipline coverage.
+-   Added milestone-neutral CI including Linux headless and GLFW/Xvfb smoke
+    gates plus Windows client smoke.
+-   All required local, CI, smoke, manual Zorin OS lifecycle, and independent
+    technical-review gates passed.
+
 ## M0 – Repository Bootstrap Complete
 
 ### Completed

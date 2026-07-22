@@ -4,9 +4,8 @@ Date: 2026-07-22
 
 Branch: `m1-platform-loop`
 
-M1 remains in progress. This document records only validation that has occurred
-locally; it does not claim GitHub Actions, Windows, or independent-review
-success.
+M1 is complete. All required automated, CI, architecture, smoke, manual, and
+independent-review gates have passed.
 
 ## Formatting correction
 
@@ -84,21 +83,22 @@ Additional Xvfb interaction checks passed:
 - A synthetic quick Escape press/release stopped the client cleanly
   (`requested_stop`, two ticks, zero discarded backlog).
 
-The raw Xvfb server has no window manager. An attempted ten-second
-`XIconifyWindow` check did not deliver an iconify state to GLFW: the process
-continued at 100% CPU and completed 622 ticks. This is a limitation of that
-manual-test harness, not evidence of a busy-wait defect in the minimized path.
-The genuine window-manager minimize/restore check remains required: minimize
-for at least ten seconds, confirm event-wait suspension and low CPU, restore
-without a catch-up burst, and close the window normally. The deterministic
-runtime integration tests cover the equivalent suspended/wait/reset behaviour.
+## Final Zorin OS desktop lifecycle validation
 
-## Remaining gates
+Final manual validation was completed on Zorin OS with the desktop window
+manager active:
 
-- Windows MSVC configure/build/test and desktop smoke in CI.
-- GitHub Actions run of the milestone-neutral workflow after the correction is
-  manually pushed.
-- Window-manager-backed ten-second minimize/restore and minimized-CPU check.
-- Independent technical review.
+- The ARPG Engine window opened and minimized normally.
+- During active execution, `arpg_client` used approximately 99–100% of one CPU
+  thread, as expected for M1 before rendering or frame limiting exists.
+- Once minimized, the process changed from `R` (running) to `S` (sleeping), and
+  repeated one-second samples reported 0.0% CPU.
+- The window restored normally, with no visible catch-up burst.
+- Escape closed the application cleanly; the prior runtime result reported
+  `discarded=0`.
 
-M1 must not be marked complete until every remaining gate passes.
+## Independent technical review
+
+The Independent Technical Review Board verdict is **PASS** for “M1 – Platform
+Layer and Fixed Game Loop.” All required M1 automated, CI, architecture, smoke,
+and manual validation gates are satisfied.

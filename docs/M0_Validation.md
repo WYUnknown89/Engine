@@ -159,5 +159,5 @@ All documented local Linux validations, source-quality checks, and required
 GitHub Actions jobs have passed. The independent technical review approved the
 M0 implementation. There are no remaining M0 gates or blockers.
 
-M0 is complete. M1 has not begun and requires explicit approval before any M1
-implementation work starts.
+M0 is complete. At the time of this M0 closure, M1 had not begun and required
+explicit approval before implementation work started.

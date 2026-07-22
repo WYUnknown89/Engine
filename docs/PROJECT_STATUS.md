@@ -6,9 +6,9 @@
 
 ## Status
 
-**In progress**
+**Complete**
 
-M1 implementation is approved and active. Do not begin M2.
+M1 is closed. Do not begin M2 until it is explicitly authorized.
 
 ## Current Branch
 
@@ -20,8 +20,8 @@ M1 implementation is approved and active. Do not begin M2.
 
 ## Latest Validated Commit
 
-- `bb6b9d07d051e514f4495b6980970f65d43c220e` – M0: Enable conforming MSVC
-  `__cplusplus`
+- `d48e131812cf67c56bd2f5b402fde541452a185a` – M1: Address independent review
+  findings; the final manual validation and review-board PASS complete M1.
 
 ## Validation Status
 
@@ -39,8 +39,10 @@ M1 implementation is approved and active. Do not begin M2.
   discarded backlog (within the 9.8–10.2 second tolerance); the Xvfb timing
   run is retained only as smoke evidence
 - Xvfb repeated-resize and synthetic quick Escape press/release checks: passed
-- Windows CI/smoke, GitHub Actions rerun, window-manager minimize/restore and
-  minimized-CPU lifecycle check, and independent review: pending
+- GitHub Actions/Windows MSVC build, test, and smoke: passed
+- Final Zorin OS window-manager minimize/restore lifecycle validation: passed;
+  minimized process state was `S` with repeated 0.0% CPU samples
+- Independent Technical Review Board: passed
 
 ### Local Linux
 
@@ -66,12 +68,8 @@ independent technical review have all passed.
 
 ## M1 Blockers
 
-- Windows MSVC CI build/test/smoke and the GitHub Actions rerun require the
-  user's manual push.
-- Required window-manager-backed minimize/restore and minimized-CPU checks
-  remain. Raw Xvfb has no window manager and cannot validate this lifecycle
-  path; see `docs/M1_Validation.md`.
-- Independent technical review remains.
+None. M1 automated, CI, architecture, smoke, manual, and independent-review
+gates have passed.
 
 ## Last Issue Identified
 
@@ -84,16 +82,13 @@ applying project policy to fetched dependencies.
 
 ## Exact Next Action
 
-Commit and push the targeted independent-review corrections manually, then
-obtain the GitHub Actions and Windows evidence. Complete the remaining
-window-manager lifecycle check and independent review before closing M1.
+Retain M1 as the completed baseline. Begin M2 only after explicit approval.
 
 ## Next Milestone
 
 **M2 – Memory, Logging and Diagnostics Foundation**
 
-M2 must not begin until every M1 validation, smoke, CI, documentation, and
-independent-review gate has passed.
+M2 must not begin without explicit approval.
 
 ## Agent Handover Instructions
 
