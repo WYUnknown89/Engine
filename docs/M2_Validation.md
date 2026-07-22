@@ -1,0 +1,93 @@
+# M2 Validation Status
+
+Date: 2026-07-22
+
+Branch: `m2-memory-diagnostics`
+
+M2 implementation is ready for independent review. It is not complete: GitHub
+Actions, Windows MSVC validation, independent technical review, and any
+resulting corrections remain required closure gates.
+
+## Local validation
+
+| Configuration or gate | Result | Tests / evidence |
+| --- | --- | --- |
+| Linux GCC Debug | passed | 43/43 CTest cases (31 unit, 12 integration) |
+| Linux Clang Debug | passed | 43/43 CTest cases (31 unit, 12 integration) |
+| Linux GCC Release | passed | 42/42 CTest cases (30 unit, 12 integration); the Debug assertion-abort probe is intentionally excluded |
+| Linux GCC Headless Debug | passed | 39/39 CTest cases (28 unit, 11 integration) |
+| `format-check` | passed | all registered project-owned C++ sources and headers |
+| `tidy` | passed | Clang Debug compilation database |
+| `git diff --check` | passed | no whitespace errors |
+
+Commands used:
+
+```bash
+cmake --preset linux-gcc-debug --fresh
+cmake --build --preset linux-gcc-debug --parallel
+ctest --preset linux-gcc-debug --output-on-failure
+
+cmake --preset linux-clang-debug --fresh
+cmake --build --preset linux-clang-debug --parallel
+ctest --preset linux-clang-debug --output-on-failure
+cmake --build --preset linux-clang-debug --target format-check
+cmake --build --preset linux-clang-debug --target tidy
+
+cmake --preset linux-gcc-release --fresh
+cmake --build --preset linux-gcc-release --parallel
+ctest --preset linux-gcc-release --output-on-failure
+ctest --test-dir build/linux-gcc-release --output-on-failure \
+  -R '^M2 allocator stress preserves bounded fixed storage$'
+./build/linux-gcc-release/tests/arpg_m2_allocator_benchmark
+
+cmake --preset linux-gcc-headless-debug --fresh
+cmake --build --preset linux-gcc-headless-debug --parallel
+ctest --preset linux-gcc-headless-debug --output-on-failure
+
+xvfb-run -a ./build/linux-gcc-debug/apps/arpg-client/arpg_client --smoke-ticks=5
+git diff --check
+```
+
+## M2-specific evidence
+
+- The Release assertion test verified that `ARPG_ASSERT` evaluates neither its
+  expression nor message in Release. A configure-time negative compilation
+  check rejects a non-Boolean assertion expression in Release, preserving the
+  compile-time validation contract.
+- Allocator tests cover backing-derived alignments from 1 through 64 bytes,
+  exact capacity, checked-overflow rejection, invalid release detection,
+  reuse, reset, move construction, move assignment, self-move safety, and
+  controlled moved-from failures.
+- The allocation-instrumented steady-state allocator test recorded zero global
+  `new` calls across arena allocation/reset and pool allocation/release/reset
+  after initialization. Existing M1 fixed-loop/input allocation tests continue
+  to pass.
+- The allocator stress test completed 200,000 pool allocate/release operations
+  and 200,000 arena allocations with bounded resets. It passed in GCC Release.
+- The observed GCC Release benchmark result was
+  `operations=1000000 pool_ns=4814605 arena_ns=2281821`. This is a baseline
+  measurement only, not a hardware-independent performance threshold.
+- Logger tests cover filtering, structured records, bounded sink registration,
+  partial sink failure, fatal severity without process termination, reentrant
+  dispatch rejection, and subsequent logger reuse.
+- Runtime diagnostics tests show optional timing records one fixed tick and one
+  frame without changing scheduling results. They remain non-authoritative.
+
+## Desktop smoke
+
+The following passed under Xvfb:
+
+```bash
+xvfb-run -a ./build/linux-gcc-debug/apps/arpg-client/arpg_client --smoke-ticks=5
+```
+
+The aggregate log reported `exit=1`, `ticks=5`, and `discarded=0`; `1` is the
+numeric `requested_stop` exit reason for the bounded smoke option. The client
+returned success.
+
+## Remaining closure gates
+
+- Push and pass the GitHub Actions matrix, including Windows MSVC Debug build,
+  CTest, and bounded desktop smoke.
+- Complete independent technical review and resolve any findings.
+- Do not begin M3 until M2 is formally closed.

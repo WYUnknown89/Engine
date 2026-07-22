@@ -3,14 +3,17 @@
 A bespoke C++20 and Vulkan 1.3 engine for a 3D isometric action RPG. The engine
 is intentionally genre-specific and is not a general-purpose game engine.
 
-**M1: Platform Layer and Fixed Game Loop is complete.** The repository now has
-a platform-neutral fixed 60 Hz runtime loop, bounded input capture, a GLFW
-desktop client path, and a headless-compatible runtime boundary. M2 has not
-begun.
+**M1: Platform Layer and Fixed Game Loop is complete. M2: Memory, Logging and
+Diagnostics Foundation is in progress.** The repository now also has bounded
+move-only allocator foundations, Debug/Release assertion contracts,
+non-throwing structured logging, and optional non-authoritative timing metrics.
 
 Validation evidence is recorded in
 [`docs/M1_Validation.md`](docs/M1_Validation.md) and
-[`docs/M0_Validation.md`](docs/M0_Validation.md).
+[`docs/M0_Validation.md`](docs/M0_Validation.md). Current M2 local validation
+evidence is recorded in [`docs/M2_Validation.md`](docs/M2_Validation.md);
+GitHub Actions, Windows validation, and independent review remain required
+before M2 can close.
 
 The canonical requirements are in
 [`docs/Master_Implementation_Specification.md`](docs/Master_Implementation_Specification.md).

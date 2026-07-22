@@ -2,17 +2,17 @@
 
 ## Current Milestone
 
-**M1 – Platform Layer and Fixed Game Loop**
+**M2 – Memory, Logging and Diagnostics Foundation**
 
 ## Status
 
-**Complete**
+**In progress**
 
-M1 is closed. Do not begin M2 until it is explicitly authorized.
+M2 implementation is authorized. Do not begin M3.
 
 ## Current Branch
 
-`m1-platform-loop`
+`m2-memory-diagnostics`
 
 ## Repository
 
@@ -20,8 +20,9 @@ M1 is closed. Do not begin M2 until it is explicitly authorized.
 
 ## Latest Validated Commit
 
-- `d48e131812cf67c56bd2f5b402fde541452a185a` – M1: Address independent review
-  findings; the final manual validation and review-board PASS complete M1.
+- `9d06e5e3335d661c1e3c01b0d70c8e3924b0b519` – M2: Implement memory
+  diagnostics foundation; local validation has passed, while M2 CI, Windows,
+  and independent-review closure gates remain open.
 
 ## Validation Status
 
@@ -46,13 +47,15 @@ M1 is closed. Do not begin M2 until it is explicitly authorized.
 
 ### Local Linux
 
-- GCC Debug: passed
-- Clang Debug: passed
-- GCC Release: passed
-- `format-check`: passed
-- `tidy`: passed
-- All discovered tests: 4/4 passed in each validated configuration
-- No bootstrap overrides used
+- M2 GCC Debug: passed, 43/43 CTest cases (31 unit, 12 integration)
+- M2 Clang Debug: passed, 43/43 CTest cases (31 unit, 12 integration)
+- M2 GCC Release: passed, 42/42 CTest cases (30 unit, 12 integration)
+- M2 GCC Headless Debug: passed, 39/39 CTest cases (28 unit, 11 integration)
+- M2 `format-check`, `tidy`, and `git diff --check`: passed
+- M2 GCC Release allocator stress: passed; benchmark observed and recorded in
+  `docs/M2_Validation.md`
+- M2 Linux GLFW/Xvfb bounded smoke: passed, five ticks and zero discarded
+  backlog
 
 ### GitHub Actions
 
@@ -71,6 +74,12 @@ independent technical review have all passed.
 None. M1 automated, CI, architecture, smoke, manual, and independent-review
 gates have passed.
 
+## M2 Blockers
+
+M2 implementation is ready for independent review. Do not mark M2 complete
+until GitHub Actions, Windows MSVC build/test/client smoke, independent review,
+and any resulting corrective work pass.
+
 ## Last Issue Identified
 
 M0 closed after resolving the Windows Vulkan SDK lookup, Catch2 C++20/string-
@@ -82,13 +91,16 @@ applying project policy to fetched dependencies.
 
 ## Exact Next Action
 
-Retain M1 as the completed baseline. Begin M2 only after explicit approval.
+Commit the M2 implementation and validation evidence on
+`m2-memory-diagnostics`, then await GitHub Actions and independent review. Do
+not begin M3.
 
 ## Next Milestone
 
 **M2 – Memory, Logging and Diagnostics Foundation**
 
-M2 must not begin without explicit approval.
+M2 is in progress and awaits its closure gates. M3 must not begin without
+explicit approval after M2 closes.
 
 ## Agent Handover Instructions
 

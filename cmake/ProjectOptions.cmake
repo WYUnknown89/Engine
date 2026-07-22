@@ -18,6 +18,12 @@ function(arpg_create_project_options)
     add_library(arpg_project_options INTERFACE)
     add_library(arpg::project_options ALIAS arpg_project_options)
     target_compile_features(arpg_project_options INTERFACE cxx_std_20)
+    target_compile_definitions(
+        arpg_project_options
+        INTERFACE
+            "$<$<CONFIG:Debug>:ARPG_ENABLE_ASSERTIONS=1>"
+            "$<$<NOT:$<CONFIG:Debug>>:ARPG_ENABLE_ASSERTIONS=0>"
+    )
 
     if(MSVC)
         target_compile_options(

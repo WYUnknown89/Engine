@@ -89,6 +89,10 @@ jobs:
         run: cmake --build --preset linux-gcc-release --parallel
       - name: Test
         run: ctest --preset linux-gcc-release --output-on-failure
+      - name: M2 allocator stress
+        run: ctest --test-dir build/linux-gcc-release --output-on-failure -R "^M2 allocator stress preserves bounded fixed storage$"
+      - name: M2 allocator benchmark
+        run: ./build/linux-gcc-release/tests/arpg_m2_allocator_benchmark
 
   ubuntu-gcc-headless-debug:
     name: Ubuntu GCC Headless Debug

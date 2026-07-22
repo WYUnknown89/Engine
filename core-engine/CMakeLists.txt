@@ -1,15 +1,31 @@
 set(ARPG_CORE_ENGINE_SOURCES
+    src/core/assert.cpp
     src/core/build_info.cpp
+    src/diagnostics/timing_metrics.cpp
     src/input/input_buffer.cpp
+    src/logging/console_sink.cpp
+    src/logging/logger.cpp
+    src/memory/fixed_block_pool.cpp
+    src/memory/linear_arena.cpp
     src/runtime/fixed_step.cpp
     src/runtime/runtime_loop.cpp
+    src/time/monotonic_clock.cpp
 )
 set(ARPG_CORE_ENGINE_HEADERS
+    include/arpg/core/assert.hpp
     include/arpg/core/build_info.hpp
+    include/arpg/diagnostics/timing_metrics.hpp
     include/arpg/input/input_buffer.hpp
     include/arpg/platform/platform.hpp
     include/arpg/runtime/fixed_step.hpp
     include/arpg/runtime/runtime_loop.hpp
+    include/arpg/time/monotonic_clock.hpp
+    include/arpg/memory/allocation.hpp
+    include/arpg/memory/detail/checked_arithmetic.hpp
+    include/arpg/memory/fixed_block_pool.hpp
+    include/arpg/memory/linear_arena.hpp
+    include/arpg/logging/console_sink.hpp
+    include/arpg/logging/logger.hpp
 )
 
 add_library(arpg_core_engine STATIC ${ARPG_CORE_ENGINE_SOURCES} ${ARPG_CORE_ENGINE_HEADERS})

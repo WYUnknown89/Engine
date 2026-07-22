@@ -1,28 +1,19 @@
 #pragma once
 
+#include "arpg/diagnostics/timing_metrics.hpp"
 #include "arpg/input/input_buffer.hpp"
 #include "arpg/platform/platform.hpp"
 #include "arpg/runtime/fixed_step.hpp"
+#include "arpg/time/monotonic_clock.hpp"
 
-#include <chrono>
 #include <cstdint>
 #include <string_view>
 
 namespace arpg::runtime {
 
-using MonotonicTime = std::chrono::duration<double>;
-
-class IClock {
-  public:
-    virtual ~IClock() = default;
-
-    [[nodiscard]] virtual auto now() noexcept -> MonotonicTime = 0;
-};
-
-class SteadyClock final : public IClock {
-  public:
-    [[nodiscard]] auto now() noexcept -> MonotonicTime override;
-};
+using MonotonicTime = time::MonotonicTime;
+using IClock = time::IMonotonicClock;
+using SteadyClock = time::SteadyClock;
 
 enum class CallbackControl : std::uint8_t {
     continue_running,
@@ -68,9 +59,20 @@ struct RunResult {
     std::string_view error_message{};
 };
 
+struct RuntimeDiagnostics {
+    time::IMonotonicClock* clock{nullptr};
+    diagnostics::TimingAccumulator* frame_times{nullptr};
+    diagnostics::TimingAccumulator* fixed_tick_times{nullptr};
+
+    [[nodiscard]] auto enabled() const noexcept -> bool {
+        return clock != nullptr && frame_times != nullptr && fixed_tick_times != nullptr;
+    }
+};
+
 class RuntimeLoop {
   public:
-    RuntimeLoop(IClock& clock, platform::IPlatform& platform, IRuntimeClient& client, FixedStepConfig config = {});
+    RuntimeLoop(IClock& clock, platform::IPlatform& platform, IRuntimeClient& client, FixedStepConfig config = {},
+                RuntimeDiagnostics diagnostics = {});
     ~RuntimeLoop();
 
     RuntimeLoop(const RuntimeLoop&) = delete;
@@ -84,6 +86,7 @@ class RuntimeLoop {
     platform::IPlatform& platform_;
     IRuntimeClient& client_;
     FixedStepScheduler scheduler_;
+    RuntimeDiagnostics diagnostics_;
     bool quiescent_{false};
 };
 

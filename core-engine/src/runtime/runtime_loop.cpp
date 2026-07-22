@@ -1,17 +1,10 @@
 #include "arpg/runtime/runtime_loop.hpp"
 
-#include <chrono>
-
 namespace arpg::runtime {
 
-auto SteadyClock::now() noexcept -> MonotonicTime {
-    static_assert(std::chrono::steady_clock::is_steady);
-    return std::chrono::duration_cast<MonotonicTime>(std::chrono::steady_clock::now().time_since_epoch());
-}
-
 RuntimeLoop::RuntimeLoop(IClock& clock, platform::IPlatform& platform, IRuntimeClient& client,
-                         const FixedStepConfig config)
-    : clock_(clock), platform_(platform), client_(client), scheduler_(config) {}
+                         const FixedStepConfig config, const RuntimeDiagnostics diagnostics)
+    : clock_(clock), platform_(platform), client_(client), scheduler_(config), diagnostics_(diagnostics) {}
 
 RuntimeLoop::~RuntimeLoop() { shutdown(); }
 
@@ -25,6 +18,7 @@ auto RuntimeLoop::run() noexcept -> RunResult {
     RunResult result{};
 
     while (true) {
+        const auto frame_start = diagnostics_.enabled() ? diagnostics_.clock->now() : MonotonicTime{};
         platform_.poll_events();
         if (platform_.failed()) {
             result.reason = RunExitReason::platform_failure;
@@ -87,7 +81,12 @@ auto RuntimeLoop::run() noexcept -> RunResult {
         for (std::uint32_t tick = 0U; tick < schedule.tick_count; ++tick) {
             const auto tick_context = scheduler_.next_tick();
             const auto snapshot = platform_.input().snapshot(tick_context.tick_index);
+            const auto fixed_start = diagnostics_.enabled() ? diagnostics_.clock->now() : MonotonicTime{};
             const auto control = client_.fixed_update(tick_context, snapshot);
+            if (diagnostics_.enabled()) {
+                static_cast<void>(diagnostics_.fixed_tick_times->record(
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(diagnostics_.clock->now() - fixed_start)));
+            }
             platform_.input().discard_transitions();
             if (control == CallbackControl::failure) {
                 result.reason = RunExitReason::client_failure;
@@ -106,6 +105,10 @@ auto RuntimeLoop::run() noexcept -> RunResult {
 
         const auto render_control =
             client_.render({.frame_index = frame_index, .interpolation_alpha = schedule.interpolation_alpha});
+        if (diagnostics_.enabled()) {
+            static_cast<void>(diagnostics_.frame_times->record(
+                std::chrono::duration_cast<std::chrono::nanoseconds>(diagnostics_.clock->now() - frame_start)));
+        }
         if (render_control == CallbackControl::failure) {
             result.reason = RunExitReason::client_failure;
             break;

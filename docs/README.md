@@ -10,6 +10,7 @@
 - [Roadmap](ROADMAP.md)
 - [M0 validation status](M0_Validation.md)
 - [M1 validation status](M1_Validation.md)
+- [M2 validation status](M2_Validation.md)
 - [Changelog](CHANGELOG.md)
 
 ## ADRs

@@ -4,7 +4,7 @@
   ---------------------------- --------
   M0 Repository Bootstrap      ✅ Complete
   M1 Platform & Game Loop      ✅ Complete
-  M2 Memory & Diagnostics      ⬜
+  M2 Memory & Diagnostics      🔄 In progress
   M3 ECS                       ⬜
   M4 Vulkan Renderer           ⬜
   M5 Asset Pipeline            ⬜

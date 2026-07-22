@@ -70,3 +70,80 @@ if(ARPG_BUILD_DESKTOP_CLIENT)
     arpg_register_format_sources(${ARPG_GLFW_PLATFORM_TEST_SOURCES})
     catch_discover_tests(arpg_glfw_platform_tests PROPERTIES LABELS "unit;platform;m1")
 endif()
+
+set(ARPG_M2_MEMORY_SOURCES
+    unit/m2_memory_tests.cpp
+)
+add_executable(arpg_m2_memory_tests ${ARPG_M2_MEMORY_SOURCES})
+target_link_libraries(arpg_m2_memory_tests PRIVATE arpg::project_options arpg::core_engine Catch2::Catch2WithMain)
+arpg_enable_project_warnings(arpg_m2_memory_tests)
+arpg_register_format_sources(${ARPG_M2_MEMORY_SOURCES})
+catch_discover_tests(arpg_m2_memory_tests PROPERTIES LABELS "unit;m2;memory")
+
+set(ARPG_M2_ASSERTION_SOURCES
+    unit/m2_assertion_tests.cpp
+)
+add_executable(arpg_m2_assertion_tests ${ARPG_M2_ASSERTION_SOURCES})
+target_link_libraries(arpg_m2_assertion_tests PRIVATE arpg::project_options arpg::core_engine Catch2::Catch2WithMain)
+arpg_enable_project_warnings(arpg_m2_assertion_tests)
+arpg_register_format_sources(${ARPG_M2_ASSERTION_SOURCES})
+catch_discover_tests(arpg_m2_assertion_tests PROPERTIES LABELS "unit;m2;assert")
+
+try_compile(
+    ARPG_M2_INVALID_RELEASE_ASSERT_COMPILED
+    "${CMAKE_BINARY_DIR}/m2-invalid-release-assert"
+    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/compile/m2_invalid_release_assert.cpp"
+    CMAKE_FLAGS "-DCMAKE_CXX_STANDARD=20" "-DCMAKE_CXX_STANDARD_REQUIRED=ON"
+)
+if(ARPG_M2_INVALID_RELEASE_ASSERT_COMPILED)
+    message(FATAL_ERROR "Release ARPG_ASSERT expressions must remain compile-time type-checked.")
+endif()
+arpg_register_format_sources(compile/m2_invalid_release_assert.cpp)
+
+add_executable(arpg_m2_assertion_probe support/m2_assertion_probe.cpp)
+target_link_libraries(arpg_m2_assertion_probe PRIVATE arpg::project_options arpg::core_engine)
+arpg_enable_project_warnings(arpg_m2_assertion_probe)
+arpg_register_format_sources(support/m2_assertion_probe.cpp)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_test(
+        NAME "M2 Debug assertion probe emits diagnostic and terminates"
+        COMMAND "${CMAKE_COMMAND}" -DPROBE=$<TARGET_FILE:arpg_m2_assertion_probe>
+                -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/verify_assertion_probe.cmake"
+    )
+    set_tests_properties("M2 Debug assertion probe emits diagnostic and terminates" PROPERTIES LABELS "unit;m2;assert")
+endif()
+
+set(ARPG_M2_LOGGING_SOURCES
+    unit/m2_logging_tests.cpp
+)
+add_executable(arpg_m2_logging_tests ${ARPG_M2_LOGGING_SOURCES})
+target_link_libraries(arpg_m2_logging_tests PRIVATE arpg::project_options arpg::core_engine Catch2::Catch2WithMain)
+arpg_enable_project_warnings(arpg_m2_logging_tests)
+arpg_register_format_sources(${ARPG_M2_LOGGING_SOURCES})
+catch_discover_tests(arpg_m2_logging_tests PROPERTIES LABELS "unit;m2;logging")
+
+set(ARPG_M2_METRICS_SOURCES
+    unit/m2_metrics_tests.cpp
+)
+add_executable(arpg_m2_metrics_tests ${ARPG_M2_METRICS_SOURCES})
+target_link_libraries(arpg_m2_metrics_tests PRIVATE arpg::project_options arpg::core_engine Catch2::Catch2WithMain)
+arpg_enable_project_warnings(arpg_m2_metrics_tests)
+arpg_register_format_sources(${ARPG_M2_METRICS_SOURCES})
+catch_discover_tests(arpg_m2_metrics_tests PROPERTIES LABELS "unit;m2;metrics")
+
+set(ARPG_M2_ALLOCATOR_STRESS_SOURCES
+    integration/m2_allocator_stress.cpp
+)
+add_executable(arpg_m2_allocator_stress_tests ${ARPG_M2_ALLOCATOR_STRESS_SOURCES})
+target_link_libraries(arpg_m2_allocator_stress_tests PRIVATE arpg::project_options arpg::core_engine Catch2::Catch2WithMain)
+arpg_enable_project_warnings(arpg_m2_allocator_stress_tests)
+arpg_register_format_sources(${ARPG_M2_ALLOCATOR_STRESS_SOURCES})
+catch_discover_tests(arpg_m2_allocator_stress_tests PROPERTIES LABELS "integration;m2;memory;stress")
+
+set(ARPG_M2_ALLOCATOR_BENCHMARK_SOURCES
+    performance/m2_allocator_benchmark.cpp
+)
+add_executable(arpg_m2_allocator_benchmark ${ARPG_M2_ALLOCATOR_BENCHMARK_SOURCES})
+target_link_libraries(arpg_m2_allocator_benchmark PRIVATE arpg::project_options arpg::core_engine)
+arpg_enable_project_warnings(arpg_m2_allocator_benchmark)
+arpg_register_format_sources(${ARPG_M2_ALLOCATOR_BENCHMARK_SOURCES})
