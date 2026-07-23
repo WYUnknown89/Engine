@@ -3,16 +3,16 @@
 A bespoke C++20 and Vulkan 1.3 engine for a 3D isometric action RPG. The engine
 is intentionally genre-specific and is not a general-purpose game engine.
 
-**M0 through M2 are complete. M3: ECS Foundation is at the closure gate on
-`m3-ecs` and is not yet complete on `main`.** The repository now also has
-generational entities, sparse-set component storage, deterministic queries,
-ordered deferred structural changes, and prepared hot-path allocation
-validation.
+**M0 through M3 are complete. M3: ECS Foundation is merged and validated on
+`main`. M4: Vulkan Renderer has not started and is not authorized for
+implementation.** The repository now also has generational entities, sparse-set
+component storage, deterministic queries, ordered deferred structural changes,
+and prepared hot-path allocation validation.
 
 Validation evidence is recorded in
 [`docs/M1_Validation.md`](docs/M1_Validation.md) and
 [`docs/M0_Validation.md`](docs/M0_Validation.md). Final M2 validation evidence
-is recorded in [`docs/M2_Validation.md`](docs/M2_Validation.md), and M3 closure
+is recorded in [`docs/M2_Validation.md`](docs/M2_Validation.md), and final M3
 evidence is recorded in [`docs/M3_Validation.md`](docs/M3_Validation.md).
 
 The canonical requirements are in

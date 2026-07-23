@@ -2,20 +2,19 @@
 
 ## Current Milestone
 
-**M3 – ECS Foundation**
+**M4 – Vulkan Renderer**
 
 ## Status
 
-**Closure gate**
+**Not started / planning gate**
 
-M2 is closed. M3 implementation, local validation, branch CI, Windows
-validation, and independent committed-code/architecture review have passed on
-`m3-ecs`. M3 remains the current milestone until manual merge to `main` and
-final `main` CI pass.
+M0 through M3 are complete. M3 implementation, validation, independent review,
+closure-branch CI, manual merge, and final `main` CI have passed. `main` is the
+current known-good M3-complete baseline. M4 implementation is not authorized.
 
 ## Current Branch
 
-`m3-ecs`
+`main`
 
 ## Repository
 
@@ -23,9 +22,9 @@ final `main` CI pass.
 
 ## Latest Validated Commit
 
-- `31cc4d54480af261685766c3ecd4385f3d5c2ef5` – M3: Complete ECS contract test
-  matrix; the full local validation matrix, branch CI, Windows client path, and
-  independent final implementation/architecture review passed.
+- `678c24692cb23a6ad890adca3724750d1696e3fc` – Merge branch `m3-ecs`; the
+  M3-complete `main` baseline passed final
+  [Engine validation run 30014888615](https://github.com/WYUnknown89/Engine/actions/runs/30014888615).
 
 ## Validation Status
 
@@ -80,7 +79,7 @@ final `main` CI pass.
 - Windows MSVC Debug: passed configure, build, and 4/4 CTest cases
 - Final workflow: [M0 validation #29833829404](https://github.com/WYUnknown89/Engine/actions/runs/29833829404)
 
-### M3 final implementation validation
+### M3 final validation
 
 - [Engine validation run 30012594722](https://github.com/WYUnknown89/Engine/actions/runs/30012594722):
   passed Ubuntu GCC Debug, Ubuntu Clang Debug, Ubuntu GCC Release, Ubuntu GCC
@@ -88,6 +87,15 @@ final `main` CI pass.
 - Windows MSVC Debug: passed configure, build, CTest, and bounded client smoke
 - Independent final committed-code/architecture review: passed for commit
   `31cc4d54480af261685766c3ecd4385f3d5c2ef5`
+- Closure-branch
+  [Engine validation run 30014140525](https://github.com/WYUnknown89/Engine/actions/runs/30014140525):
+  passed all six jobs for commit
+  `96b240890f99d318b4fabc1aafbc5d830abf822c`
+- M3 was manually merged to `main` by merge commit
+  `678c24692cb23a6ad890adca3724750d1696e3fc`
+- Final `main`
+  [Engine validation run 30014888615](https://github.com/WYUnknown89/Engine/actions/runs/30014888615):
+  passed all six jobs
 
 ### M2 final validation
 
@@ -112,11 +120,10 @@ gates have passed.
 None. M2 local, CI, Windows, smoke, benchmark, and independent-review gates
 have passed.
 
-## M3 Closure Gates
+## M3 Blockers
 
-No implementation or review blockers remain. M3 is closure-ready on `m3-ecs`
-but is not yet complete on `main`. The remaining gates are closure-commit branch
-CI, manual merge to `main` after independent confirmation, and final `main` CI.
+None. M3 implementation, local validation, branch CI, Windows validation,
+independent review, closure-branch CI, manual merge, and final `main` CI passed.
 
 ## Last Issue Identified
 
@@ -127,16 +134,16 @@ final review passed with no remaining implementation findings.
 
 ## Exact Next Action
 
-Commit and push the M3 closure documentation on `m3-ecs`, pass final branch CI,
-obtain independent confirmation, then manually merge to `main` and pass final
-`main` CI. Do not merge automatically and do not begin M4.
+Prepare the M4 plan, obtain independent architecture review, and secure explicit
+approval before creating an M4 branch or beginning implementation.
 
 ## Next Milestone
 
-**M3 – ECS**
+**M4 – Vulkan Renderer**
 
-**Closure gate.** M3 remains current until manual merge and final `main` CI.
-M4 is not started and is not authorized.
+**Not started / planning gate.** M4 implementation must not begin until its
+planning and independent architecture-review gates pass and the plan is
+explicitly approved.
 
 ## Agent Handover Instructions
 

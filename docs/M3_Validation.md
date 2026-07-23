@@ -2,12 +2,12 @@
 
 Date: 2026-07-23
 
-Branch: `m3-ecs`
+Final baseline: `main` at
+`678c24692cb23a6ad890adca3724750d1696e3fc`
 
-M3 is at the closure gate on `m3-ecs`. Implementation, the complete local
-validation matrix, branch CI, Windows validation, and independent
-committed-code/architecture review have passed. M3 is not yet complete on
-`main`.
+M3 is complete. Implementation, the complete local validation matrix,
+independent committed-code/architecture review, closure-branch CI, manual merge
+to `main`, and final `main` CI have passed.
 
 ## Local validation
 
@@ -88,7 +88,7 @@ accumulation variation while still detecting material workload divergence.
   multi-component iteration, value mutation, deferred submission, and flush.
 - The GLFW/Xvfb smoke run reported five ticks and `discarded=0`.
 
-## Branch CI, Windows, and independent review
+## CI, Windows, independent review, and merge
 
 - GitHub Actions
   [Engine validation run 30012594722](https://github.com/WYUnknown89/Engine/actions/runs/30012594722)
@@ -102,11 +102,19 @@ accumulation variation while still detecting material workload divergence.
   allocation, benchmark, contract-test, portability, and M0/M1/M2 regression
   review gates for commit
   `31cc4d54480af261685766c3ecd4385f3d5c2ef5`.
+- Closure-branch
+  [Engine validation run 30014140525](https://github.com/WYUnknown89/Engine/actions/runs/30014140525)
+  passed all six jobs for closure commit
+  `96b240890f99d318b4fabc1aafbc5d830abf822c`.
+- M3 was manually merged to `main` by merge commit
+  `678c24692cb23a6ad890adca3724750d1696e3fc`.
+- Final `main`
+  [Engine validation run 30014888615](https://github.com/WYUnknown89/Engine/actions/runs/30014888615)
+  passed Ubuntu GCC Debug, Ubuntu Clang Debug, Ubuntu GCC Release, Ubuntu GCC
+  Headless Debug, Linux GLFW Client Smoke, and Windows MSVC Debug.
 
-## Remaining closure gates
+## Final status
 
-- Push the closure commit and pass its final `m3-ecs` GitHub Actions run.
-- After independent confirmation, manually merge `m3-ecs` to `main`.
-- Pass the final `main` GitHub Actions run.
-
-Do not begin M4 before those gates close and M4 is explicitly authorized.
+No M3 gates or blockers remain. `main` is the known-good M3-complete baseline.
+M4 has not started; implementation requires an approved plan following
+independent architecture review.

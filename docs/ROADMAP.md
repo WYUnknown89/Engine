@@ -5,7 +5,7 @@
   M0 Repository Bootstrap      ✅ Complete
   M1 Platform & Game Loop      ✅ Complete
   M2 Memory & Diagnostics      ✅ Complete
-  M3 ECS                       🔄 Closure gate
+  M3 ECS                       ✅ Complete
   M4 Vulkan Renderer           ⬜
   M5 Asset Pipeline            ⬜
   M6 World Foundation          ⬜
