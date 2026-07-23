@@ -18,6 +18,10 @@
 
 namespace arpg::ecs {
 
+namespace testing {
+struct RegistryTestAccess;
+}
+
 template <typename T>
 concept Component =
     std::is_object_v<T> && std::same_as<T, std::remove_cv_t<T>> && std::is_nothrow_move_constructible_v<T> &&
@@ -438,6 +442,8 @@ class Registry {
     }
 
   private:
+    friend struct testing::RegistryTestAccess;
+
     struct Slot {
         std::uint32_t generation{1U};
         bool alive{false};

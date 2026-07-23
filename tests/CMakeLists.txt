@@ -148,6 +148,7 @@ arpg_enable_project_warnings(arpg_m2_allocator_benchmark)
 arpg_register_format_sources(${ARPG_M2_ALLOCATOR_BENCHMARK_SOURCES})
 
 set(ARPG_M3_ECS_SOURCES
+    unit/m3_ecs_contract_tests.cpp
     unit/m3_ecs_tests.cpp
     support/m3_component_type_identity_tu.cpp
 )
