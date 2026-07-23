@@ -422,6 +422,7 @@ class Registry {
                 driver = candidate.get();
             }
         }
+        IterationGuard guard{*this};
         std::size_t visited = 0U;
         for (const Entity entity : driver->entities()) {
             std::apply(
@@ -453,13 +454,15 @@ class Registry {
 
     class IterationGuard {
       public:
-        explicit IterationGuard(Registry& registry) noexcept : registry_(registry) { ++registry_.iteration_depth_; }
+        explicit IterationGuard(const Registry& registry) noexcept : registry_(registry) {
+            ++registry_.iteration_depth_;
+        }
         ~IterationGuard() { --registry_.iteration_depth_; }
         IterationGuard(const IterationGuard&) = delete;
         auto operator=(const IterationGuard&) -> IterationGuard& = delete;
 
       private:
-        Registry& registry_;
+        const Registry& registry_;
     };
 
     [[nodiscard]] auto append_command(DeferredCommand command) noexcept -> EcsStatus;
@@ -527,7 +530,7 @@ class Registry {
     std::vector<std::unique_ptr<detail::IComponentPool>> pools_{};
     std::vector<DeferredCommand> commands_{};
     std::size_t command_limit_{0U};
-    std::size_t iteration_depth_{0U};
+    mutable std::size_t iteration_depth_{0U};
 };
 
 } // namespace arpg::ecs

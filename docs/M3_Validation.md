@@ -12,8 +12,8 @@ closure.
 
 | Configuration or gate | Result |
 | --- | --- |
-| Linux GCC Debug | passed, 51/51 CTest cases |
-| Linux Clang Debug | passed, 51/51 CTest cases |
+| Linux GCC Debug | passed, 53/53 CTest cases |
+| Linux Clang Debug | pending corrective rerun |
 | `format-check` | passed |
 | `tidy` | passed |
 | Linux GCC Release | passed, 51/51 CTest cases |

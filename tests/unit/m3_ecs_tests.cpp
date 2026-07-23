@@ -169,3 +169,18 @@ TEST_CASE("M3 const registry query exposes const component references", "[unit][
               [&](const arpg::ecs::Entity, const Position& position) { observed = position.value; }) == 1U);
     CHECK(observed == 9);
 }
+
+TEST_CASE("M3 const iteration protects a captured mutable registry", "[unit][m3][ecs][query]") {
+    arpg::ecs::Registry mutable_registry;
+    const auto entity = mutable_registry.create().entity;
+    REQUIRE(mutable_registry.emplace<Position>(entity, 9).status == arpg::ecs::EcsStatus::success);
+    REQUIRE(mutable_registry.prepare_deferred_commands(1U) == arpg::ecs::EcsStatus::success);
+    const arpg::ecs::Registry& registry = mutable_registry;
+    CHECK(registry.for_each<Position>([&](const arpg::ecs::Entity traversed, const Position&) {
+        CHECK(mutable_registry.destroy(traversed) == arpg::ecs::EcsStatus::iteration_active);
+        CHECK(mutable_registry.defer_remove<Position>(traversed) == arpg::ecs::EcsStatus::success);
+        CHECK(registry.for_each<Position>([](const auto, const Position&) {}) == 1U);
+    }) == 1U);
+    CHECK(mutable_registry.flush_deferred().applied == 1U);
+    CHECK_FALSE(mutable_registry.contains<Position>(entity));
+}

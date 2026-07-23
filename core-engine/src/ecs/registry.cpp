@@ -42,17 +42,18 @@ auto Registry::create() -> CreateResult {
         return {{}, EcsStatus::entity_index_exhausted};
     }
     try {
-        slots_.reserve(slots_.size() + 1U);
-        free_slots_.reserve(slots_.size() + 1U);
+        const std::size_t new_slot_count = slots_.size() + 1U;
+        slots_.reserve(new_slot_count);
+        free_slots_.reserve(new_slot_count);
+        for (auto& pool : pools_) {
+            pool->ensure_sparse_for_entity(new_slot_count);
+        }
         slots_.push_back({});
     } catch (...) {
         return {{}, EcsStatus::allocation_failed};
     }
     const std::uint32_t index = static_cast<std::uint32_t>(slots_.size() - 1U);
     slots_.back().alive = true;
-    for (auto& pool : pools_) {
-        pool->ensure_sparse_for_entity(slots_.size());
-    }
     ++live_entities_;
     return {Entity::from_parts(index, 1U), EcsStatus::success};
 }
