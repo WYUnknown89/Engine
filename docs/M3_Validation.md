@@ -4,20 +4,20 @@ Date: 2026-07-23
 
 Branch: `m3-ecs`
 
-M3 is in progress. This document records local implementation evidence only;
-GitHub CI, Windows validation, and independent committed-code review remain
-required before closure.
+M3 is in progress. Corrective local validation has passed; GitHub CI, Windows
+validation, and independent committed-code review remain required before
+closure.
 
 ## Local validation
 
 | Configuration or gate | Result |
 | --- | --- |
-| Linux GCC Debug | passed, 49/49 CTest cases |
-| Linux Clang Debug | passed, 49/49 CTest cases |
+| Linux GCC Debug | passed, 51/51 CTest cases |
+| Linux Clang Debug | passed, 51/51 CTest cases |
 | `format-check` | passed |
 | `tidy` | passed |
-| Linux GCC Release | passed, 48/48 CTest cases |
-| Linux GCC Headless Debug | passed, 45/45 CTest cases |
+| Linux GCC Release | passed, 50/50 CTest cases |
+| Linux GCC Headless Debug | passed, 47/47 CTest cases |
 | Linux GLFW/Xvfb smoke | passed, five ticks and zero discarded backlog |
 | `git diff --check` | passed |
 
@@ -56,6 +56,17 @@ m3_ecs_benchmark positions=1200 moving=1000 warmup_ticks=120 measured_ticks=600 
 ```
 
 This is baseline evidence, not a hardware-independent pass/fail timing target.
+
+## Corrective evidence
+
+- Queries resolve all requested component-pool pointers once before traversal;
+  per-entity membership and retrieval use those direct pointers.
+- Entity creation reserves corresponding FIFO reuse capacity, so later
+  destruction does not allocate.
+- Prepared deferred-add capacity is checked at enqueue and regression-tested
+  after immediate capacity consumption.
+- Allocation instrumentation recorded zero global allocations across prepared
+  multi-component iteration, value mutation, deferred submission, and flush.
 
 ## Pending gates
 

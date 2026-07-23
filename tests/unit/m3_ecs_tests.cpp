@@ -3,11 +3,16 @@
 
 #include <catch2/catch_test_macros.hpp>
 #include <cstdint>
+#include <cstdlib>
 #include <limits>
 #include <memory>
+#include <new>
 #include <utility>
 
 namespace {
+
+bool allocation_tracking = false;
+std::uint64_t allocation_count = 0U;
 
 struct Position {
     int value{0};
@@ -27,6 +32,19 @@ struct MoveOnly {
 };
 
 } // namespace
+
+void* operator new(const std::size_t size) {
+    if (allocation_tracking) {
+        ++allocation_count;
+    }
+    if (void* const memory = std::malloc(size); memory != nullptr) {
+        return memory;
+    }
+    throw std::bad_alloc{};
+}
+
+void operator delete(void* const memory) noexcept { std::free(memory); }
+void operator delete(void* const memory, const std::size_t) noexcept { std::free(memory); }
 
 TEST_CASE("M3 ComponentTypeId is process-wide across translation units", "[unit][m3][ecs][identity]") {
     const auto local = arpg::ecs::component_type_id<CrossTranslationUnitComponent>();
@@ -137,4 +155,40 @@ TEST_CASE("M3 deferred destruction dominates later commands and flush is explici
     CHECK_FALSE(registry.valid(entity));
     CHECK(report.invalid_targets == 1U);
     CHECK(registry.get<Position>(entity) == nullptr);
+}
+
+TEST_CASE("M3 prepared hot operations allocate no storage and bound deferred additions",
+          "[unit][m3][ecs][allocation]") {
+    arpg::ecs::Registry registry;
+    REQUIRE(registry.prepare_entities(3U) == arpg::ecs::EcsStatus::success);
+    const auto first = registry.create().entity;
+    const auto second = registry.create().entity;
+    REQUIRE(registry.prepare_components<Position>(2U) == arpg::ecs::EcsStatus::success);
+    REQUIRE(registry.emplace<Position>(first, 1).status == arpg::ecs::EcsStatus::success);
+    REQUIRE(registry.prepare_deferred_commands(2U) == arpg::ecs::EcsStatus::success);
+    REQUIRE(registry.prepare_deferred_adds<Position>(1U) == arpg::ecs::EcsStatus::success);
+    REQUIRE(registry.emplace<Position>(second, 2).status == arpg::ecs::EcsStatus::success);
+    CHECK(registry.defer_add<Position>(first, Position{3}) == arpg::ecs::EcsStatus::component_capacity_exhausted);
+
+    REQUIRE(registry.remove<Position>(second) == arpg::ecs::EcsStatus::success);
+    allocation_count = 0U;
+    allocation_tracking = true;
+    const auto queued = registry.defer_add<Position>(second, Position{4});
+    const auto report = registry.flush_deferred();
+    static_cast<void>(registry.for_each<Position>([](auto, Position& position) { ++position.value; }));
+    allocation_tracking = false;
+    CHECK(queued == arpg::ecs::EcsStatus::success);
+    CHECK(report.applied == 1U);
+    CHECK(allocation_count == 0U);
+}
+
+TEST_CASE("M3 const registry query exposes const component references", "[unit][m3][ecs][query]") {
+    arpg::ecs::Registry mutable_registry;
+    const auto entity = mutable_registry.create().entity;
+    REQUIRE(mutable_registry.emplace<Position>(entity, 9).status == arpg::ecs::EcsStatus::success);
+    const arpg::ecs::Registry& registry = mutable_registry;
+    int observed = 0;
+    CHECK(registry.for_each<Position>(
+              [&](const arpg::ecs::Entity, const Position& position) { observed = position.value; }) == 1U);
+    CHECK(observed == 9);
 }

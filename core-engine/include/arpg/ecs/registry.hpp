@@ -1,5 +1,6 @@
 #pragma once
 
+#include "arpg/core/assert.hpp"
 #include "arpg/ecs/component_type_id.hpp"
 #include "arpg/ecs/entity.hpp"
 
@@ -34,6 +35,8 @@ enum class EcsStatus : std::uint8_t {
     deferred_payload_full,
     component_type_not_prepared,
     component_capacity_exhausted,
+    capacity_limit_exceeded,
+    allocation_failed,
 };
 
 struct CreateResult {
@@ -72,6 +75,7 @@ class IComponentPool {
     [[nodiscard]] virtual auto entities() const noexcept -> std::span<const Entity> = 0;
     virtual auto remove(Entity entity) noexcept -> bool = 0;
     virtual void reserve_sparse(std::size_t capacity) = 0;
+    virtual void ensure_sparse_for_entity(std::size_t entity_count) = 0;
     virtual void clear() noexcept = 0;
     [[nodiscard]] virtual auto has_payload_capacity() const noexcept -> bool = 0;
     virtual auto stage_payload_from_erased(void* value) noexcept -> std::size_t = 0;
@@ -151,6 +155,9 @@ template <Component T> class ComponentPool final : public IComponentPool {
     }
 
     void reserve_sparse(const std::size_t capacity) override { sparse_.reserve(capacity); }
+    void ensure_sparse_for_entity(const std::size_t entity_count) override {
+        prepare_sparse_for_existing_entities(entity_count);
+    }
 
     void clear() noexcept override {
         while (!dense_components_.empty()) {
@@ -163,10 +170,24 @@ template <Component T> class ComponentPool final : public IComponentPool {
 
     [[nodiscard]] auto has_payload_capacity() const noexcept -> bool override { return !free_payloads_.empty(); }
 
+    [[nodiscard]] auto can_accept_deferred_add(const Entity entity) const noexcept -> bool {
+        return entity.index() < sparse_.size() &&
+               dense_components_.size() + pending_payloads_ <= dense_components_.capacity() &&
+               dense_entities_.size() + pending_payloads_ <= dense_entities_.capacity();
+    }
+
+    [[nodiscard]] auto can_stage_deferred_add(const Entity entity) const noexcept -> bool {
+        return entity.index() < sparse_.size() &&
+               dense_components_.size() + pending_payloads_ < dense_components_.capacity() &&
+               dense_entities_.size() + pending_payloads_ < dense_entities_.capacity();
+    }
+
     auto stage_payload_from_erased(void* const value) noexcept -> std::size_t override {
         const std::size_t index = free_payloads_.back();
         free_payloads_.pop_back();
+        ARPG_ASSERT(!staged_payloads_[index].has_value(), "A deferred payload slot was not released before reuse.");
         staged_payloads_[index].emplace(std::move(*static_cast<T*>(value)));
+        ++pending_payloads_;
         return index;
     }
 
@@ -175,7 +196,10 @@ template <Component T> class ComponentPool final : public IComponentPool {
             return;
         }
         staged_payloads_[payload_index].reset();
+        ARPG_ASSERT(free_payloads_.size() < free_payloads_.capacity(),
+                    "Deferred payload free list capacity was not prepared.");
         free_payloads_.push_back(payload_index);
+        --pending_payloads_;
     }
 
     auto apply_payload(const Entity entity, const std::size_t payload_index) noexcept -> EcsStatus override {
@@ -186,13 +210,12 @@ template <Component T> class ComponentPool final : public IComponentPool {
             discard_payload(payload_index);
             return EcsStatus::component_already_present;
         }
-        T value = std::move(*staged_payloads_[payload_index]);
-        discard_payload(payload_index);
-        try {
-            static_cast<void>(emplace(entity, std::move(value)));
-        } catch (...) {
+        if (!can_accept_deferred_add(entity)) {
             return EcsStatus::component_capacity_exhausted;
         }
+        T* const component = emplace(entity, std::move(*staged_payloads_[payload_index]));
+        ARPG_ASSERT(component != nullptr, "Prepared deferred component insertion unexpectedly failed.");
+        discard_payload(payload_index);
         return EcsStatus::success;
     }
 
@@ -205,6 +228,12 @@ template <Component T> class ComponentPool final : public IComponentPool {
         free_payloads_.reserve(capacity);
         for (std::size_t index = capacity; index > previous_size; --index) {
             free_payloads_.push_back(index - 1U);
+        }
+    }
+
+    void prepare_sparse_for_existing_entities(const std::size_t entity_count) {
+        if (sparse_.size() < entity_count) {
+            sparse_.resize(entity_count, no_dense_index);
         }
     }
 
@@ -221,6 +250,7 @@ template <Component T> class ComponentPool final : public IComponentPool {
     std::vector<std::size_t> sparse_{};
     std::vector<std::optional<T>> staged_payloads_{};
     std::vector<std::size_t> free_payloads_{};
+    std::size_t pending_payloads_{0U};
 };
 
 } // namespace detail
@@ -254,9 +284,13 @@ class Registry {
         if (!commands_.empty()) {
             return EcsStatus::deferred_commands_pending;
         }
-        auto& pool = ensure_pool<T>();
-        pool.reserve(capacity);
-        pool.reserve_sparse(slots_.capacity());
+        try {
+            auto& pool = ensure_pool<T>();
+            pool.reserve(capacity);
+            pool.reserve_sparse(slots_.capacity());
+        } catch (...) {
+            return EcsStatus::allocation_failed;
+        }
         return EcsStatus::success;
     }
 
@@ -267,10 +301,15 @@ class Registry {
         if (!commands_.empty()) {
             return EcsStatus::deferred_commands_pending;
         }
-        auto& pool = ensure_pool<T>();
-        pool.reserve(pool.size() + capacity);
-        pool.reserve_sparse(slots_.capacity());
-        pool.prepare_payloads(capacity);
+        try {
+            auto& pool = ensure_pool<T>();
+            pool.reserve(pool.size() + capacity);
+            pool.reserve_sparse(slots_.capacity());
+            pool.prepare_sparse_for_existing_entities(slots_.size());
+            pool.prepare_payloads(capacity);
+        } catch (...) {
+            return EcsStatus::allocation_failed;
+        }
         return EcsStatus::success;
     }
 
@@ -286,11 +325,20 @@ class Registry {
         if (!valid(entity)) {
             return {nullptr, EcsStatus::invalid_entity};
         }
-        auto& pool = ensure_pool<T>();
-        if (pool.contains(entity)) {
+        detail::ComponentPool<T>* pool = nullptr;
+        try {
+            pool = &ensure_pool<T>();
+        } catch (...) {
+            return {nullptr, EcsStatus::allocation_failed};
+        }
+        if (pool->contains(entity)) {
             return {nullptr, EcsStatus::component_already_present};
         }
-        return {pool.emplace(entity, std::forward<Args>(args)...), EcsStatus::success};
+        try {
+            return {pool->emplace(entity, std::forward<Args>(args)...), EcsStatus::success};
+        } catch (...) {
+            return {nullptr, EcsStatus::allocation_failed};
+        }
     }
 
     template <Component T> [[nodiscard]] auto remove(const Entity entity) noexcept -> EcsStatus {
@@ -347,6 +395,9 @@ class Registry {
         if (!pool->has_payload_capacity()) {
             return EcsStatus::deferred_payload_full;
         }
+        if (!pool->can_stage_deferred_add(entity)) {
+            return EcsStatus::component_capacity_exhausted;
+        }
         const std::size_t payload = pool->stage_payload_from_erased(&component);
         commands_.push_back({DeferredCommand::Kind::add, entity, component_type_id<T>(), payload});
         return EcsStatus::success;
@@ -354,6 +405,35 @@ class Registry {
 
     template <Component... Ts, typename Function> [[nodiscard]] auto for_each(Function&& function) -> std::size_t {
         return for_each_impl<Ts...>(std::forward<Function>(function));
+    }
+
+    template <Component... Ts, typename Function>
+    [[nodiscard]] auto for_each(Function&& function) const -> std::size_t {
+        static_assert(sizeof...(Ts) > 0U);
+        static_assert(detail::UniqueTypes<Ts...>::value);
+        const auto pools = std::tuple<const detail::ComponentPool<Ts>*...>{find_pool<Ts>()...};
+        if (std::apply([](const auto*... pool) { return ((pool == nullptr) || ...); }, pools)) {
+            return 0U;
+        }
+        const detail::IComponentPool* driver = nullptr;
+        for (const auto& candidate : pools_) {
+            const bool requested = ((candidate->type_id() == component_type_id<Ts>()) || ...);
+            if (requested && (driver == nullptr || candidate->size() < driver->size())) {
+                driver = candidate.get();
+            }
+        }
+        std::size_t visited = 0U;
+        for (const Entity entity : driver->entities()) {
+            std::apply(
+                [&](const auto*... pool) {
+                    if ((pool->contains(entity) && ...)) {
+                        function(entity, *pool->get(entity)...);
+                        ++visited;
+                    }
+                },
+                pools);
+        }
+        return visited;
     }
 
   private:
@@ -411,7 +491,8 @@ class Registry {
     template <Component... Ts, typename Function> [[nodiscard]] auto for_each_impl(Function&& function) -> std::size_t {
         static_assert(sizeof...(Ts) > 0U);
         static_assert(detail::UniqueTypes<Ts...>::value);
-        if (((find_pool<Ts>() == nullptr) || ...)) {
+        auto pools = std::tuple<detail::ComponentPool<Ts>*...>{find_pool<Ts>()...};
+        if (std::apply([](const auto*... pool) { return ((pool == nullptr) || ...); }, pools)) {
             return 0U;
         }
         detail::IComponentPool* driver = nullptr;
@@ -427,10 +508,14 @@ class Registry {
         IterationGuard guard{*this};
         std::size_t visited = 0U;
         for (const Entity entity : driver->entities()) {
-            if (((find_pool<Ts>()->contains(entity)) && ...)) {
-                function(entity, *find_pool<Ts>()->get(entity)...);
-                ++visited;
-            }
+            std::apply(
+                [&](auto*... pool) {
+                    if ((pool->contains(entity) && ...)) {
+                        function(entity, *pool->get(entity)...);
+                        ++visited;
+                    }
+                },
+                pools);
         }
         return visited;
     }

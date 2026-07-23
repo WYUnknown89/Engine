@@ -41,9 +41,18 @@ auto Registry::create() -> CreateResult {
     if (slots_.size() > static_cast<std::size_t>(std::numeric_limits<std::uint32_t>::max())) {
         return {{}, EcsStatus::entity_index_exhausted};
     }
-    slots_.push_back({});
+    try {
+        slots_.reserve(slots_.size() + 1U);
+        free_slots_.reserve(slots_.size() + 1U);
+        slots_.push_back({});
+    } catch (...) {
+        return {{}, EcsStatus::allocation_failed};
+    }
     const std::uint32_t index = static_cast<std::uint32_t>(slots_.size() - 1U);
     slots_.back().alive = true;
+    for (auto& pool : pools_) {
+        pool->ensure_sparse_for_entity(slots_.size());
+    }
     ++live_entities_;
     return {Entity::from_parts(index, 1U), EcsStatus::success};
 }
@@ -73,6 +82,8 @@ auto Registry::destroy_impl(const Entity entity) noexcept -> EcsStatus {
         return EcsStatus::success;
     }
     ++slot.generation;
+    ARPG_ASSERT(free_slots_.size() < free_slots_.capacity(),
+                "Entity creation did not reserve reusable-slot capacity for destruction.");
     free_slots_.push_back(entity.index());
     return EcsStatus::success;
 }
@@ -87,10 +98,14 @@ auto Registry::prepare_entities(const std::size_t capacity) -> EcsStatus {
     if (capacity > static_cast<std::size_t>(std::numeric_limits<std::uint32_t>::max()) + 1U) {
         return EcsStatus::entity_index_exhausted;
     }
-    slots_.reserve(capacity);
-    free_slots_.reserve(capacity);
-    for (auto& pool : pools_) {
-        pool->reserve_sparse(capacity);
+    try {
+        slots_.reserve(capacity);
+        free_slots_.reserve(capacity);
+        for (auto& pool : pools_) {
+            pool->reserve_sparse(capacity);
+        }
+    } catch (...) {
+        return EcsStatus::allocation_failed;
     }
     return EcsStatus::success;
 }
@@ -102,7 +117,11 @@ auto Registry::prepare_deferred_commands(const std::size_t capacity) -> EcsStatu
     if (!commands_.empty()) {
         return EcsStatus::deferred_commands_pending;
     }
-    commands_.reserve(capacity);
+    try {
+        commands_.reserve(capacity);
+    } catch (...) {
+        return EcsStatus::allocation_failed;
+    }
     command_limit_ = capacity;
     return EcsStatus::success;
 }
