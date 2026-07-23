@@ -146,3 +146,30 @@ add_executable(arpg_m2_allocator_benchmark ${ARPG_M2_ALLOCATOR_BENCHMARK_SOURCES
 target_link_libraries(arpg_m2_allocator_benchmark PRIVATE arpg::project_options arpg::core_engine)
 arpg_enable_project_warnings(arpg_m2_allocator_benchmark)
 arpg_register_format_sources(${ARPG_M2_ALLOCATOR_BENCHMARK_SOURCES})
+
+set(ARPG_M3_ECS_SOURCES
+    unit/m3_ecs_contract_tests.cpp
+    unit/m3_ecs_tests.cpp
+    support/m3_component_type_identity_tu.cpp
+)
+add_executable(arpg_m3_ecs_tests ${ARPG_M3_ECS_SOURCES})
+target_include_directories(arpg_m3_ecs_tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/support")
+target_link_libraries(arpg_m3_ecs_tests PRIVATE arpg::project_options arpg::core_engine Catch2::Catch2WithMain)
+arpg_enable_project_warnings(arpg_m3_ecs_tests)
+arpg_register_format_sources(${ARPG_M3_ECS_SOURCES} support/m3_component_type_identity_shared.hpp)
+catch_discover_tests(arpg_m3_ecs_tests PROPERTIES LABELS "unit;m3;ecs")
+
+add_executable(arpg_m3_ecs_allocation_tests unit/m3_ecs_allocation_tests.cpp)
+target_link_libraries(arpg_m3_ecs_allocation_tests PRIVATE arpg::project_options arpg::core_engine)
+arpg_enable_project_warnings(arpg_m3_ecs_allocation_tests)
+arpg_register_format_sources(unit/m3_ecs_allocation_tests.cpp)
+add_test(NAME "M3 prepared ECS operations allocate no storage" COMMAND arpg_m3_ecs_allocation_tests)
+set_tests_properties("M3 prepared ECS operations allocate no storage" PROPERTIES LABELS "unit;m3;ecs;allocation")
+
+set(ARPG_M3_ECS_BENCHMARK_SOURCES
+    performance/m3_ecs_benchmark.cpp
+)
+add_executable(arpg_m3_ecs_benchmark ${ARPG_M3_ECS_BENCHMARK_SOURCES})
+target_link_libraries(arpg_m3_ecs_benchmark PRIVATE arpg::project_options arpg::core_engine)
+arpg_enable_project_warnings(arpg_m3_ecs_benchmark)
+arpg_register_format_sources(${ARPG_M3_ECS_BENCHMARK_SOURCES})

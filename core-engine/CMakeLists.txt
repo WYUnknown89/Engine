@@ -1,6 +1,7 @@
 set(ARPG_CORE_ENGINE_SOURCES
     src/core/assert.cpp
     src/core/build_info.cpp
+    src/ecs/registry.cpp
     src/diagnostics/timing_metrics.cpp
     src/input/input_buffer.cpp
     src/logging/console_sink.cpp
@@ -14,6 +15,9 @@ set(ARPG_CORE_ENGINE_SOURCES
 set(ARPG_CORE_ENGINE_HEADERS
     include/arpg/core/assert.hpp
     include/arpg/core/build_info.hpp
+    include/arpg/ecs/component_type_id.hpp
+    include/arpg/ecs/entity.hpp
+    include/arpg/ecs/registry.hpp
     include/arpg/diagnostics/timing_metrics.hpp
     include/arpg/input/input_buffer.hpp
     include/arpg/platform/platform.hpp

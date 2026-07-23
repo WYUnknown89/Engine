@@ -1,5 +1,23 @@
 # Changelog
 
+## M3 – ECS Foundation Closure Ready
+
+### Closure evidence
+
+-   Added 64-bit generational entities with FIFO reuse and permanent generation
+    exhaustion retirement, sparse-set component pools, deterministic
+    smallest-pool queries, and ordered explicit deferred structural changes.
+-   Added ODR-safe opaque process-local component type identity, test-only
+    generation-exhaustion and allocation-failure controls, and prepared
+    zero-allocation hot-path validation.
+-   Added complete entity, component, query, deferred-command, cross-translation
+    unit identity, allocation, and Release benchmark evidence.
+-   Local GCC/Clang/Release/headless validation, Linux client smoke, all six
+    GitHub Actions jobs in run 30012594722, Windows MSVC build/test/client
+    smoke, and independent final implementation/architecture review passed.
+-   M3 remains at the closure gate on `m3-ecs`; manual merge and final `main` CI
+    are still required before it is complete on `main`.
+
 ## M2 – Memory, Logging and Diagnostics Foundation Complete
 
 ### Completed

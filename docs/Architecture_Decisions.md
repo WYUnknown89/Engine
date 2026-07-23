@@ -17,6 +17,7 @@ context.
 | ADR-0008 | One-way engine, gameplay, application, and tool dependencies | Accepted |
 | ADR-0009 | Platform loop, input, and lifetime contracts | Accepted |
 | ADR-0010 | Memory, logging, and diagnostics contracts | Accepted |
+| ADR-0011 | ECS foundation contracts | Accepted |
 
 The audit's “Locked Architecture Decisions” section is binding unless a later
 accepted ADR explicitly supersedes a decision.
