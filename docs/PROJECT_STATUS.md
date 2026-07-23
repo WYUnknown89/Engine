@@ -2,17 +2,18 @@
 
 ## Current Milestone
 
-**M2 – Memory, Logging and Diagnostics Foundation**
+**M3 – ECS Foundation**
 
 ## Status
 
-**Complete**
+**In progress**
 
-M2 is closed. M3 is not started and must not begin without explicit approval.
+M2 is closed. M3 implementation is authorized on `m3-ecs`; closure remains
+blocked on local validation, CI, and independent committed-code review.
 
 ## Current Branch
 
-`m2-memory-diagnostics`
+`m3-ecs`
 
 ## Repository
 
@@ -20,9 +21,8 @@ M2 is closed. M3 is not started and must not begin without explicit approval.
 
 ## Latest Validated Commit
 
-- `b945d7e64bea8c19ce39c6d4309c0a7e61489fe3` – M2: Correct clang-tidy
-  contracts; the complete local, CI, Windows, smoke, benchmark, and
-  independent-review validation matrix has passed.
+- `2133dd01459f6d5f589b9d9faef1babfc95234fb` – M2: Close memory diagnostics
+  milestone.
 
 ## Validation Status
 
@@ -104,7 +104,8 @@ Retain M2 as the completed baseline. Do not begin M3 without explicit approval.
 
 **M3 – ECS**
 
-**Not started.** M3 must not begin without explicit approval.
+**In progress.** Do not mark M3 complete before local validation, CI, and
+independent committed-code review pass.
 
 ## Agent Handover Instructions
 
