@@ -4,9 +4,10 @@ Date: 2026-07-23
 
 Branch: `m3-ecs`
 
-M3 is in progress. The complete corrective contract-test matrix and local
-validation have passed. GitHub CI, Windows validation, and independent
-committed-code review remain required before closure.
+M3 is at the closure gate on `m3-ecs`. Implementation, the complete local
+validation matrix, branch CI, Windows validation, and independent
+committed-code/architecture review have passed. M3 is not yet complete on
+`main`.
 
 ## Local validation
 
@@ -87,9 +88,25 @@ accumulation variation while still detecting material workload divergence.
   multi-component iteration, value mutation, deferred submission, and flush.
 - The GLFW/Xvfb smoke run reported five ticks and `discarded=0`.
 
-## Pending gates
+## Branch CI, Windows, and independent review
 
-- Windows MSVC Debug configure/build/test/client smoke.
-- GitHub Actions validation, including the Release M3 benchmark job.
-- Independent committed-code and architecture review.
-- M3 closure documentation and closure commit are intentionally not created.
+- GitHub Actions
+  [Engine validation run 30012594722](https://github.com/WYUnknown89/Engine/actions/runs/30012594722)
+  passed all six jobs for commit
+  `31cc4d54480af261685766c3ecd4385f3d5c2ef5`: Ubuntu GCC Debug,
+  Ubuntu Clang Debug, Ubuntu GCC Release, Ubuntu GCC Headless Debug, Linux
+  GLFW Client Smoke, and Windows MSVC Debug.
+- Windows MSVC Debug configure, build, CTest, and bounded client smoke passed.
+- Independent final committed-code/architecture review passed specification,
+  ECS architecture, lifetime, query, deferred-command, component-identity,
+  allocation, benchmark, contract-test, portability, and M0/M1/M2 regression
+  review gates for commit
+  `31cc4d54480af261685766c3ecd4385f3d5c2ef5`.
+
+## Remaining closure gates
+
+- Push the closure commit and pass its final `m3-ecs` GitHub Actions run.
+- After independent confirmation, manually merge `m3-ecs` to `main`.
+- Pass the final `main` GitHub Actions run.
+
+Do not begin M4 before those gates close and M4 is explicitly authorized.

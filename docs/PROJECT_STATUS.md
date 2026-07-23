@@ -6,10 +6,12 @@
 
 ## Status
 
-**In progress**
+**Closure gate**
 
-M2 is closed. M3 implementation is authorized on `m3-ecs`; closure remains
-blocked on local validation, CI, and independent committed-code review.
+M2 is closed. M3 implementation, local validation, branch CI, Windows
+validation, and independent committed-code/architecture review have passed on
+`m3-ecs`. M3 remains the current milestone until manual merge to `main` and
+final `main` CI pass.
 
 ## Current Branch
 
@@ -21,8 +23,9 @@ blocked on local validation, CI, and independent committed-code review.
 
 ## Latest Validated Commit
 
-- `2133dd01459f6d5f589b9d9faef1babfc95234fb` – M2: Close memory diagnostics
-  milestone.
+- `31cc4d54480af261685766c3ecd4385f3d5c2ef5` – M3: Complete ECS contract test
+  matrix; the full local validation matrix, branch CI, Windows client path, and
+  independent final implementation/architecture review passed.
 
 ## Validation Status
 
@@ -57,12 +60,34 @@ blocked on local validation, CI, and independent committed-code review.
 - M2 Linux GLFW/Xvfb bounded smoke: passed, five ticks and zero discarded
   backlog
 
+### M3 local validation
+
+- GCC Debug: passed, 73/73 CTest cases
+- Clang Debug: passed, 73/73 CTest cases
+- GCC Release: passed, 72/72 CTest cases
+- GCC Headless Debug: passed, 69/69 CTest cases
+- `format-check`, `tidy`, and `git diff --check`: passed
+- Dedicated prepared-hot-path allocation test: passed with zero measured
+  allocations and transactional sparse-growth failure recovery
+- Release benchmark: expected 5,400,000 visits and deterministic checksum
+  verified; full timing evidence is recorded in `docs/M3_Validation.md`
+- Linux GLFW/Xvfb bounded smoke: passed, five ticks and zero discarded backlog
+
 ### GitHub Actions
 
 - Ubuntu GCC Debug: passed
 - Ubuntu Clang Debug: passed
 - Windows MSVC Debug: passed configure, build, and 4/4 CTest cases
 - Final workflow: [M0 validation #29833829404](https://github.com/WYUnknown89/Engine/actions/runs/29833829404)
+
+### M3 final implementation validation
+
+- [Engine validation run 30012594722](https://github.com/WYUnknown89/Engine/actions/runs/30012594722):
+  passed Ubuntu GCC Debug, Ubuntu Clang Debug, Ubuntu GCC Release, Ubuntu GCC
+  Headless Debug, Linux GLFW Client Smoke, and Windows MSVC Debug
+- Windows MSVC Debug: passed configure, build, CTest, and bounded client smoke
+- Independent final committed-code/architecture review: passed for commit
+  `31cc4d54480af261685766c3ecd4385f3d5c2ef5`
 
 ### M2 final validation
 
@@ -87,25 +112,31 @@ gates have passed.
 None. M2 local, CI, Windows, smoke, benchmark, and independent-review gates
 have passed.
 
+## M3 Closure Gates
+
+No implementation or review blockers remain. M3 is closure-ready on `m3-ecs`
+but is not yet complete on `main`. The remaining gates are closure-commit branch
+CI, manual merge to `main` after independent confirmation, and final `main` CI.
+
 ## Last Issue Identified
 
-M0 closed after resolving the Windows Vulkan SDK lookup, Catch2 C++20/string-
-view mismatch, and MSVC legacy `__cplusplus` reporting. Their fixes are
-recorded in `docs/M0_Validation.md`.
-
-The final MSVC project-options fix adds `/Zc:__cplusplus` centrally without
-applying project policy to fetched dependencies.
+Independent M3 review identified transactional entity creation, const-query
+iteration protection, and contract-test coverage gaps. Commits through
+`31cc4d54480af261685766c3ecd4385f3d5c2ef5` corrected them, and the independent
+final review passed with no remaining implementation findings.
 
 ## Exact Next Action
 
-Retain M2 as the completed baseline. Do not begin M3 without explicit approval.
+Commit and push the M3 closure documentation on `m3-ecs`, pass final branch CI,
+obtain independent confirmation, then manually merge to `main` and pass final
+`main` CI. Do not merge automatically and do not begin M4.
 
 ## Next Milestone
 
 **M3 – ECS**
 
-**In progress.** Do not mark M3 complete before local validation, CI, and
-independent committed-code review pass.
+**Closure gate.** M3 remains current until manual merge and final `main` CI.
+M4 is not started and is not authorized.
 
 ## Agent Handover Instructions
 
