@@ -16,7 +16,7 @@ closure.
 | Linux Clang Debug | passed, 51/51 CTest cases |
 | `format-check` | passed |
 | `tidy` | passed |
-| Linux GCC Release | passed, 50/50 CTest cases |
+| Linux GCC Release | passed, 51/51 CTest cases |
 | Linux GCC Headless Debug | passed, 47/47 CTest cases |
 | Linux GLFW/Xvfb smoke | passed, five ticks and zero discarded backlog |
 | `git diff --check` | passed |
@@ -52,10 +52,13 @@ git diff --check
 GCC Release result:
 
 ```text
-m3_ecs_benchmark positions=1200 moving=1000 warmup_ticks=120 measured_ticks=600 samples=9 median_ns=6778921 p95_ns=7078007 checksum=18642696.000
+m3_ecs_benchmark compiler=13.3.0 build=Release positions=1200 moving=1000 warmup_ticks=120 measured_ticks=600 samples=9 total_visits=5400000 expected_visits=5400000 visits_verified=true median_batch_ns=1070327 p95_batch_ns=1114351 median_ns_per_tick=1783.878 visits_per_second=560576347.228 measured_allocations=0 checksum=18642696.000 expected_checksum=18642696.000 checksum_tolerance=186.427 checksum_verified=true
 ```
 
 This is baseline evidence, not a hardware-independent pass/fail timing target.
+The checksum tolerance is the greater of 0.5 and 0.001% of the expected
+single-precision aggregate; it accommodates compiler/platform floating-point
+accumulation variation while still detecting material workload divergence.
 
 ## Corrective evidence
 
