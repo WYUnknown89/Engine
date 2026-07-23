@@ -158,6 +158,13 @@ arpg_enable_project_warnings(arpg_m3_ecs_tests)
 arpg_register_format_sources(${ARPG_M3_ECS_SOURCES} support/m3_component_type_identity_shared.hpp)
 catch_discover_tests(arpg_m3_ecs_tests PROPERTIES LABELS "unit;m3;ecs")
 
+add_executable(arpg_m3_ecs_allocation_tests unit/m3_ecs_allocation_tests.cpp)
+target_link_libraries(arpg_m3_ecs_allocation_tests PRIVATE arpg::project_options arpg::core_engine)
+arpg_enable_project_warnings(arpg_m3_ecs_allocation_tests)
+arpg_register_format_sources(unit/m3_ecs_allocation_tests.cpp)
+add_test(NAME "M3 prepared ECS operations allocate no storage" COMMAND arpg_m3_ecs_allocation_tests)
+set_tests_properties("M3 prepared ECS operations allocate no storage" PROPERTIES LABELS "unit;m3;ecs;allocation")
+
 set(ARPG_M3_ECS_BENCHMARK_SOURCES
     performance/m3_ecs_benchmark.cpp
 )
